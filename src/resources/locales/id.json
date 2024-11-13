@@ -242,5 +242,17 @@
   "Part Shade": "Bagian Naungan",
   "Full Sun": "Matahari Penuh",
   "Congratulations!": "Selamat!",
-  "You have found a healthy plant!": "Anda telah menemukan tanaman yang sehat!"
+  "You have found a healthy plant!": "Anda telah menemukan tanaman yang sehat!",
+  "No internet connection. Please check your connection and try again.": "Tidak ada koneksi internet. ",
+  "Camera permission denied. Please go to settings and enable camera permission.": "Izin kamera ditolak. ",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "Izin galeri ditolak. ",
+  "No camera device found. Please check your camera and try again.": "Tidak ada perangkat kamera yang ditemukan. ",
+  "Something went wrong. Please try again later!": "Ada yang tidak beres. ",
+  "AI server is down. Please try again later!": "Server AI sedang down. ",
+  "Image cannot be translated. Please try another image!": "Gambar tidak dapat diterjemahkan. ",
+  "Image convert failed. Please try again later!": "Konversi gambar gagal. ",
+  "This plant already exists in garden.": "Tanaman ini sudah ada di kebun.",
+  "Bad image. Please try another image.": "Citra buruk. ",
+  "Your Plant is Healthy and Disease-Free!": "Tanaman Anda Sehat dan Bebas Penyakit!",
+  "No image found": "Tidak ada gambar yang ditemukan"
 }

@@ -242,5 +242,17 @@
   "Part Shade": "Sombra parcial",
   "Full Sun": "pleno sol",
   "Congratulations!": "¡Felicidades!",
-  "You have found a healthy plant!": "¡Has encontrado una planta saludable!"
+  "You have found a healthy plant!": "¡Has encontrado una planta saludable!",
+  "No internet connection. Please check your connection and try again.": "Sin conexión a Internet. ",
+  "Camera permission denied. Please go to settings and enable camera permission.": "Permiso de cámara denegado. ",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "Permiso de la galería denegado. ",
+  "No camera device found. Please check your camera and try again.": "No se encontró ningún dispositivo de cámara. ",
+  "Something went wrong. Please try again later!": "Algo salió mal. ",
+  "AI server is down. Please try again later!": "El servidor de IA no funciona. ",
+  "Image cannot be translated. Please try another image!": "La imagen no se puede traducir. ",
+  "Image convert failed. Please try again later!": "Error al convertir la imagen. ",
+  "This plant already exists in garden.": "Esta planta ya existe en el jardín.",
+  "Bad image. Please try another image.": "Mala imagen. ",
+  "Your Plant is Healthy and Disease-Free!": "¡Tu planta está sana y libre de enfermedades!",
+  "No image found": "No se encontró ninguna imagen"
 }

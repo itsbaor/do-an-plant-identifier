@@ -242,5 +242,17 @@
   "Part Shade": "भाग छाया",
   "Full Sun": "पूर्ण सूर्य",
   "Congratulations!": "बधाई हो!",
-  "You have found a healthy plant!": "आपको एक स्वस्थ पौधा मिल गया है!"
+  "You have found a healthy plant!": "आपको एक स्वस्थ पौधा मिल गया है!",
+  "No internet connection. Please check your connection and try again.": "कोई इंटरनेट कनेक्शन नहीं। ",
+  "Camera permission denied. Please go to settings and enable camera permission.": "कैमरे की अनुमति अस्वीकृत. ",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "गैलरी की अनुमति अस्वीकृत. ",
+  "No camera device found. Please check your camera and try again.": "कोई कैमरा उपकरण नहीं मिला. ",
+  "Something went wrong. Please try again later!": "कुछ गलत हो गया। ",
+  "AI server is down. Please try again later!": "एआई सर्वर डाउन है. ",
+  "Image cannot be translated. Please try another image!": "छवि का अनुवाद नहीं किया जा सकता. ",
+  "Image convert failed. Please try again later!": "छवि रूपांतरण विफल. ",
+  "This plant already exists in garden.": "यह पौधा पहले से ही बगीचे में मौजूद है।",
+  "Bad image. Please try another image.": "ख़राब छवि. ",
+  "Your Plant is Healthy and Disease-Free!": "आपका पौधा स्वस्थ और रोग-मुक्त है!",
+  "No image found": "कोई छवि नहीं मिली"
 }

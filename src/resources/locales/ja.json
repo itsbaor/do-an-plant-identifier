@@ -242,5 +242,17 @@
   "Part Shade": "パートシェード",
   "Full Sun": "完全な太陽",
   "Congratulations!": "おめでとう！",
-  "You have found a healthy plant!": "元気な植物を見つけました！"
+  "You have found a healthy plant!": "元気な植物を見つけました！",
+  "No internet connection. Please check your connection and try again.": "インターネット接続がありません。",
+  "Camera permission denied. Please go to settings and enable camera permission.": "カメラの許可が拒否されました。",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "ギャラリーの許可が拒否されました。",
+  "No camera device found. Please check your camera and try again.": "カメラデバイスが見つかりません。",
+  "Something went wrong. Please try again later!": "何か問題が発生しました。",
+  "AI server is down. Please try again later!": "AIサーバーがダウンしています。",
+  "Image cannot be translated. Please try another image!": "画像は翻訳できません。",
+  "Image convert failed. Please try again later!": "画像変換に失敗しました。",
+  "This plant already exists in garden.": "この植物はすでに庭にあります。",
+  "Bad image. Please try another image.": "悪いイメージ。",
+  "Your Plant is Healthy and Disease-Free!": "あなたの植物は健康で病気がありません!",
+  "No image found": "画像が見つかりませんでした"
 }

@@ -242,5 +242,17 @@
   "Part Shade": "Part Shade",
   "Full Sun": "Full Sun",
   "Congratulations!": "Congratulations!",
-  "You have found a healthy plant!": "You have found a healthy plant!"
+  "You have found a healthy plant!": "You have found a healthy plant!",
+  "No internet connection. Please check your connection and try again.": "No internet connection. Please check your connection and try again.",
+  "Camera permission denied. Please go to settings and enable camera permission.": "Camera permission denied. Please go to settings and enable camera permission.",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "Gallery permission denied. Please go to settings and enable gallery permission.",
+  "No camera device found. Please check your camera and try again.": "No camera device found. Please check your camera and try again.",
+  "Something went wrong. Please try again later!": "Something went wrong. Please try again later!",
+  "AI server is down. Please try again later!": "AI server is down. Please try again later!",
+  "Image cannot be translated. Please try another image!": "Image cannot be translated. Please try another image!",
+  "Image convert failed. Please try again later!": "Image convert failed. Please try again later!",
+  "This plant already exists in garden.": "This plant already exists in garden.",
+  "Bad image. Please try another image.": "Bad image. Please try another image.",
+  "Your Plant is Healthy and Disease-Free!": "Your Plant is Healthy and Disease-Free!",
+  "No image found": "No image found"
 }

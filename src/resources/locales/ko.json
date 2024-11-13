@@ -242,5 +242,17 @@
   "Part Shade": "부분 그늘",
   "Full Sun": "가득 찬 태양",
   "Congratulations!": "축하해요!",
-  "You have found a healthy plant!": "건강한 식물을 발견했어요!"
+  "You have found a healthy plant!": "건강한 식물을 발견했어요!",
+  "No internet connection. Please check your connection and try again.": "인터넷에 연결되어 있지 않습니다. ",
+  "Camera permission denied. Please go to settings and enable camera permission.": "카메라 권한이 거부되었습니다. ",
+  "Gallery permission denied. Please go to settings and enable gallery permission.": "갤러리 권한이 거부되었습니다. ",
+  "No camera device found. Please check your camera and try again.": "카메라 장치를 찾을 수 없습니다. ",
+  "Something went wrong. Please try again later!": "문제가 발생했습니다. ",
+  "AI server is down. Please try again later!": "AI 서버가 다운되었습니다. ",
+  "Image cannot be translated. Please try another image!": "이미지를 번역할 수 없습니다. ",
+  "Image convert failed. Please try again later!": "이미지 변환에 실패했습니다. ",
+  "This plant already exists in garden.": "이 식물은 정원에 이미 존재합니다.",
+  "Bad image. Please try another image.": "나쁜 이미지. ",
+  "Your Plant is Healthy and Disease-Free!": "당신의 식물은 건강하고 질병이 없습니다!",
+  "No image found": "이미지를 찾을 수 없습니다"
 }
