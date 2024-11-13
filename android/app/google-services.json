@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "775348186583",
+    "project_id": "icm005-plant-identifier",
+    "storage_bucket": "icm005-plant-identifier.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775348186583:android:6d50d9444c3919f2182f92",
+        "android_client_info": {
+          "package_name": "com.ichime.plant.identifier.id"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwS9YWhBDZPjzq1pV3evpI9-u1JYVkR9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
