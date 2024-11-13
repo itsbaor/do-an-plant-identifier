@@ -608,14 +608,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 32,
-    width: 105,
+    // width: 105,
+    paddingHorizontal: 10,
     borderRadius: 5,
     gap: 5,
   },
   buttonText: {
     fontSize: 12,
     fontWeight: '600',
-    width: '50%',
   },
   ph_20: {
     paddingHorizontal: 20,
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
   imageBgContainer: {
     width: '100%',
     height: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     justifyContent: 'flex-end',
     paddingBottom: 10,
   },

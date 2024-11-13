@@ -132,13 +132,13 @@ const SettingScreen = () => {
             marginTop: 20,
             position: 'relative',
             width: '100%',
-            height: 110,
+            height: 150,
           }}>
           <Image
             source={require('~/resources/images/plantSetting.png')}
             style={{
               position: 'absolute',
-              top: '-10%',
+              top: '10%',
               left: SCREEN_WIDTH > 400 ? '5%' : '2%',
               zIndex: 3,
               height: 300,
@@ -154,14 +154,16 @@ const SettingScreen = () => {
               width: '100%',
               height: '100%',
               flex: 1,
-              padding: 10,
+              padding: 20,
+              paddingTop: 7,
               flexDirection: 'row',
             }}>
             <View style={{flex: 0.5}}></View>
             <View
               style={{
                 flex: 0.5,
-                justifyContent: 'space-between',
+                // justifyContent: 'space-between',
+                gap: 3,
                 alignItems: 'flex-start',
               }}>
               <Text
@@ -172,7 +174,7 @@ const SettingScreen = () => {
                   elevation: 5,
                   fontSize: SCREEN_WIDTH > 400 ? 18 : 16,
                   fontWeight: '700',
-                  lineHeight: SCREEN_WIDTH > 400 ? 20 : 18,
+                  // lineHeight: SCREEN_WIDTH > 400 ? 20 : 18,
                   textShadowColor: 'rgba(0, 0, 0, 0.50)',
                   textShadowOffset: {width: 2, height: 2},
                   textShadowRadius: 5,
@@ -180,14 +182,14 @@ const SettingScreen = () => {
                 {t('Upgrade to')}
               </Text>
               <Text
-                numberOfLines={2}
+                numberOfLines={1}
                 style={{
                   textAlign: 'center',
                   color: theme.colors.text_white,
                   elevation: 5,
-                  fontSize: SCREEN_WIDTH > 400 ? 33 : 29,
+                  fontSize: SCREEN_WIDTH > 400 ? 32 : 29,
                   fontWeight: '700',
-                  lineHeight: SCREEN_WIDTH > 400 ? 42 : 38,
+                  // lineHeight: SCREEN_WIDTH > 400 ? 42 : 38,
                   textShadowColor: 'rgba(0, 0, 0, 0.50)',
                   textShadowOffset: {width: 2, height: 2},
                   textShadowRadius: 5,
@@ -200,7 +202,7 @@ const SettingScreen = () => {
                   navigation.push('PremiumScreen', {appStart: false});
                 }}>
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={[styles.buttonText, {color: theme.colors.text_white}]}>
                   {t('Try it now')}
                 </Text>
@@ -208,6 +210,7 @@ const SettingScreen = () => {
               </TouchableOpacity>
             </View>
           </View>
+
           <View
             style={{
               flex: 1,
@@ -261,10 +264,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
     paddingVertical: 8,
     alignItems: 'center',
-    width: SCREEN_WIDTH * 0.4,
+    // width: SCREEN_WIDTH * 0.4,
   },
   buttonText: {
     fontSize: 15,
     fontWeight: '700',
+    maxWidth: SCREEN_WIDTH * 0.3,
+    textAlign: 'center',
   },
 });

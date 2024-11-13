@@ -38,6 +38,7 @@ import {findSmallestKeyValue} from '~/screens/SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import NativeItemGarden from '~/components/ads/NativeItemGarden';
 import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
+import {stateLang} from '~/redux/slices/langSlices';
 
 export const KEY_PLANT_LIST = '@plant_list';
 
@@ -46,6 +47,7 @@ const MyGarden = () => {
   const dispatch = useAppDispatch();
   const g_plantStorage = useAppSelector(statePlantStorage);
   const g_aiKey = useAppSelector(stateKeyAi);
+  const g_lang = useAppSelector(stateLang);
   const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const theme = useAppTheme();
   const {openModal, closeModals} = useModal();
@@ -115,6 +117,7 @@ const MyGarden = () => {
         sunlight: plant.sunlevel,
       },
       g_aiKey,
+      g_lang,
     );
     plantDetail
       ? navigation.navigate('PlantDetailScreen', plantDetail)
@@ -260,10 +263,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontSize: 22,
     fontWeight: '700',
+    textAlign: 'center',
   },
   title2: {
     fontSize: 12,
     fontWeight: '400',
+    textAlign: 'center',
   },
   btnText: {
     fontSize: 18,

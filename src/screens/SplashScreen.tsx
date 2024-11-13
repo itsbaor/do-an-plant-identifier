@@ -131,6 +131,25 @@ const SplashScreen = () => {
 
   const interSplash = useInterstitialAd(ID_INTER_SPLASH);
   const [waitingAds, setWaitingAds] = useState<boolean>(true);
+  const trans = [
+    t('Success'),
+    t('No internet connection. Please check your connection and try again.'),
+    t(
+      'Camera permission denied. Please go to settings and enable camera permission.',
+    ),
+    t(
+      'Gallery permission denied. Please go to settings and enable gallery permission.',
+    ),
+    t('No camera device found. Please check your camera and try again.'),
+    t('Something went wrong. Please try again later!'),
+    t('AI server is down. Please try again later!'),
+    t('Image cannot be translated. Please try another image!'),
+    t('Image convert failed. Please try again later!'),
+    t('This plant already exists in garden.'),
+    t('Bad image. Please try another image.'),
+    t('Your Plant is Healthy and Disease-Free!'),
+    t('No image found'),
+  ];
 
   const checkConsent = async (): Promise<boolean> => {
     const consentInfo = await AdsConsent.requestInfoUpdate();

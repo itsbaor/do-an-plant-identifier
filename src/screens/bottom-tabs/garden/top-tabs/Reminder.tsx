@@ -286,10 +286,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontSize: 22,
     fontWeight: '700',
+    textAlign: 'center',
   },
   title2: {
     fontSize: 12,
     fontWeight: '400',
+    textAlign: 'center',
   },
   btnText: {
     fontSize: 18,

@@ -50,6 +50,7 @@ import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import NativeItemSearch from '~/components/ads/NativeItemSearch';
+import {stateLang} from '~/redux/slices/langSlices';
 
 export const handleAddPlantToGarden = async (plant: t_PlantType) => {
   const res = await addPlantToStorage(plant);
@@ -80,6 +81,7 @@ const SearchScreen = () => {
   const adsRemote = useAppSelector(stateAdsRemote);
   const g_Category = useAppSelector(stateCategory);
   const g_aiKey = useAppSelector(stateKeyAi);
+  const g_lang = useAppSelector(stateLang);
   const {openModal, closeModals} = useModal();
   const [searchPlantList, setSearchPlantList] = useState<t_PlantType[]>([]);
   const navigation =
@@ -108,6 +110,7 @@ const SearchScreen = () => {
         sunlight: plant.sunlevel,
       },
       g_aiKey,
+      g_lang,
     );
     plantDetail
       ? navigation.navigate('PlantDetailScreen', plantDetail)

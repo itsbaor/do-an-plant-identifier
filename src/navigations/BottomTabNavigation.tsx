@@ -35,6 +35,7 @@ import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {useAppSelector} from '~/hooks/useReduxStore';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import {e_CamFunc} from '~/screens/bottom-tabs/ScanScreen';
+import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 
 export type BottomTabParamList = {
   HomeScreen: undefined;
@@ -79,7 +80,8 @@ const BottomTabNavigation = () => {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarStyle: {
-            height: 55,
+            height: 65,
+            paddingTop: 20,
             borderTopLeftRadius: Platform.OS === 'android' ? 20 : 0,
             borderTopRightRadius: Platform.OS === 'android' ? 20 : 0,
           },
@@ -97,7 +99,7 @@ const BottomTabNavigation = () => {
                   }
                 />
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={[
                     styles.tabText,
                     {
@@ -124,7 +126,7 @@ const BottomTabNavigation = () => {
                   }
                 />
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={[
                     styles.tabText,
                     {
@@ -167,7 +169,7 @@ const BottomTabNavigation = () => {
                   }
                 />
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={[
                     styles.tabText,
                     {
@@ -194,7 +196,7 @@ const BottomTabNavigation = () => {
                   }
                 />
                 <Text
-                  numberOfLines={1}
+                  numberOfLines={2}
                   style={[
                     styles.tabText,
                     {
@@ -223,9 +225,10 @@ const BottomTabNavigation = () => {
 
 const styles = StyleSheet.create({
   tabCenter: {
-    top: -30,
+    top: -45,
   },
   tabBtn: {
+    height: 65,
     alignItems: 'center',
     gap: 1,
   },
@@ -233,6 +236,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     fontWeight: '500',
+    width: SCREEN_WIDTH / 5.3,
+    textAlign: 'center',
   },
 });
 

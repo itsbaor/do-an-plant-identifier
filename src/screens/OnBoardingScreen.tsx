@@ -52,7 +52,7 @@ const OnBoardingScreen = () => {
   const [errorLoadAdsFull, setErrorLoadAdsFull] = useState<boolean>(false);
 
   const ID_NATIVE_FULL = useMemo(
-    () => (__DEV__ ? undefined : adsRemote.ONBOARDING_FULL.id),
+    () => adsRemote.ONBOARDING_FULL.id,
     [adsRemote],
   );
   const ID_OB = useMemo(
@@ -225,7 +225,11 @@ const OnBoardingScreen = () => {
                   <NativeFull
                     adId={ID_NATIVE_FULL}
                     setWaitAds={setWaitingAds}
-                    setAdsLoadError={setErrorLoadAdsFull}
+                    handleActionLoadFail={() => {
+                      let newIndex = index + 1;
+                      swiper.current?.scrollBy(index);
+                      handleOnIndexChange(newIndex);
+                    }}
                   />
                 )}
               </View>
