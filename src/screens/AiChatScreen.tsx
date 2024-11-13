@@ -85,16 +85,14 @@ const AiChatScreen = () => {
     ? undefined
     : adsRemote.NATIVE_AI_PLANT_EXPERT.id;
 
-  const ID_ADS_REWARD = __DEV__
-    ? testIdReward.REWARDED
-    : adsRemote.REWARD_AI_PLANT_EXPERT.id;
+  const ID_ADS_REWARD = adsRemote.REWARD_AI_PLANT_EXPERT.id;
   const ID_ADS_REWARD_BACK = __DEV__
     ? testIdReward.REWARDED
     : adsRemote.REWARD_AI_PLANT_EXPERT.id;
   const [waitingAds, setWaitingAds] = useState<boolean>(
     adsRemote.NATIVE_AI_PLANT_EXPERT.isOn,
   );
-  const {isLoaded, isClosed, load, show} = useRewardedAd(ID_ADS_REWARD);
+  const {isLoaded, isClosed, load, show, error} = useRewardedAd(ID_ADS_REWARD);
   const rewardsBack = useRewardedAd(ID_ADS_REWARD_BACK);
 
   const handleScrollEnd = () => {
@@ -134,7 +132,7 @@ const AiChatScreen = () => {
       dispatch(
         setStateChat([
           ...chatData,
-          {type: CHAT.USER, content: question},
+          // {type: CHAT.USER, content: question},
           {type: CHAT.AI, content: aiAnswer},
         ]),
       );
@@ -247,10 +245,10 @@ const AiChatScreen = () => {
   }, [isLoaded]);
 
   useEffect(() => {
-    if (isClosed) {
+    if (isClosed || error) {
       handleResolveAiAnswer(question, g_lang);
     }
-  }, [isClosed]);
+  }, [isClosed, error]);
 
   useEffect(() => {
     const unsubscribe = firestore()

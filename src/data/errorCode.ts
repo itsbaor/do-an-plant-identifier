@@ -31,6 +31,6 @@ export const ERROR_MSG: Error = {
   IMAGE_CONVERT_FAILER: 'Image convert failed. Please try again later!',
   PLANT_EXISTED: 'This plant already exists in garden.',
   BAD_IMAGE: 'Bad image. Please try another image.',
-  HEALTHY_PLANT: 'Your plant is healthy!',
+  HEALTHY_PLANT: 'Your Plant is Healthy and Disease-Free!',
   NO_IMAGE_FOUND: 'No image found',
 };

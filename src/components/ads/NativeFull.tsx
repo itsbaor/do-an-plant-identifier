@@ -1,10 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  BackHandler,
-  Platform,
-  Text,
-  View,
-} from 'react-native';
+import {BackHandler, Platform, Text, View} from 'react-native';
 import NativeAdView, {
   AdManager,
   CallToActionView,
@@ -26,12 +21,14 @@ const NativeFull = React.memo(
     setAdsHigh,
     setAdsLoadError,
     setWaitAds,
+    handleActionLoadFail,
     closeAds,
   }: {
     adId?: string;
     setAdsHigh?: React.Dispatch<React.SetStateAction<boolean>>;
     setAdsLoadError?: React.Dispatch<React.SetStateAction<boolean>>;
     setWaitAds?: React.Dispatch<React.SetStateAction<boolean>>;
+    handleActionLoadFail?: () => void;
     closeAds?: () => void;
   }): JSX.Element => {
     const theme = useAppTheme();
@@ -57,6 +54,7 @@ const NativeFull = React.memo(
       setWaitAds && setWaitAds(false);
       setAdsHigh && setAdsHigh(false);
       setAdsLoadError && setAdsLoadError(true);
+      handleActionLoadFail && handleActionLoadFail();
       console.log('AD', 'FAILED', event);
     };
 
