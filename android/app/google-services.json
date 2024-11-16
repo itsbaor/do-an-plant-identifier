@@ -2,12 +2,12 @@
   "project_info": {
     "project_number": "775348186583",
     "project_id": "icm005-plant-identifier",
-    "storage_bucket": "icm005-plant-identifier.appspot.com"
+    "storage_bucket": "icm005-plant-identifier.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:775348186583:android:6d50d9444c3919f2182f92",
+        "mobilesdk_app_id": "1:775348186583:android:b4288731c3317366182f92",
         "android_client_info": {
           "package_name": "com.ichime.plant.identifier.id"
         }
@@ -22,7 +22,8 @@
         "appinvite_service": {
           "other_platform_oauth_client": []
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-5540714455115639~3961114748"
     }
   ],
   "configuration_version": "1"

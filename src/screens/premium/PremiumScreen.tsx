@@ -58,9 +58,9 @@ const PremiumScreen = () => {
   useEffect(() => {
     const handleGetProducts = async () => {
       try {
-        openModal('LoadingModal', {
-          message: t('Loading...'),
-        });
+        // openModal('LoadingModal', {
+        //   message: t('Loading...'),
+        // });
         await initConnection().then(async () => {
           await getSubscriptions({
             skus: [itemIdAndroid.WEEKLY, itemIdAndroid.YEARLY],
@@ -71,9 +71,9 @@ const PremiumScreen = () => {
             setYearly(yearlyItem.subscriptionOfferDetails[0]);
           });
         });
-        closeModals('LoadingModal');
+        // closeModals('LoadingModal');
       } catch (error) {
-        closeModals('LoadingModal');
+        // closeModals('LoadingModal');
         Notifier.showNotification({
           title: 'Oopss!',
           description: t('Error when getting subs! Please try again later.'),

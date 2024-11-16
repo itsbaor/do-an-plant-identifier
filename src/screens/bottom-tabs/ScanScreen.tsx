@@ -390,6 +390,7 @@ const ScanScreen = () => {
       );
       closeModals('LoadingModal');
     }, TIME_OUT_DURATION);
+    console.log('AI key Identify:', aiKeyNow);
     const response = await getIdentifyResultByPromtImage(
       aiKeyNow,
       prompt,
@@ -540,6 +541,7 @@ const ScanScreen = () => {
       );
       closeModals('LoadingModal');
     }, TIME_OUT_DURATION);
+    console.log('AI key Diagnose:', aiKeyNow);
     const response = await getDiagnoseResultByImageFile(
       aiKeyNow,
       getPromtDiagnose(),
@@ -561,7 +563,7 @@ const ScanScreen = () => {
       if (response.message == ERROR_MSG.HEALTHY_PLANT) {
         showNotification(
           t('Congratulations!'),
-          t('You have found a healthy plant!'),
+          t(ERROR_MSG.HEALTHY_PLANT),
           'success',
         );
         return;
