@@ -171,18 +171,7 @@ const SplashScreen = () => {
 
   const loadScreen = async (isSub = false) => {
     try {
-      const lng = await AsyncStorage.getItem(KEY_LANG);
-      if (lng) {
-        //Da chay tren 1 lan
-        i18n.changeLanguage(lng);
-        dispatch(setStateLang(lng as t_Lang));
-        isSub &&
-          navigation.navigate('BottomTabNavigation', {screen: 'HomeScreen'});
-        !isSub && navigation.navigate('PremiumScreen', {appStart: true});
-      } else {
-        //Chay lan dau
-        navigation.navigate('LanguageScreen');
-      }
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Dev defined error: ', error);
     }
@@ -400,15 +389,6 @@ const SplashScreen = () => {
           </Text>
         </View>
       </View>
-      {/** Loading ads */}
-      {adsRemote.BANNER_SPLASH?.isOn && (
-        <BannerAd
-          unitId={ID_BANNER_SPLASH}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          onAdFailedToLoad={() => setWaitingAds(false)}
-          onAdLoaded={() => setWaitingAds(false)}
-        />
-      )}
     </SafeAreaView>
   );
 };
