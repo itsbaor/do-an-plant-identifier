@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, TextInput, Button, HelperText, ActivityIndicator, Divider } from "react-native-paper";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootParamList } from "~/navigations/RootNavigation";
 
 /**
- * React Native Login / Register screen
+ * React Native Login / Register screen (English version)
  *
- * Requirements in your app (already present per stack trace):
+ * Requirements:
  * - <PaperProvider> at root
- * - React Navigation stack/screen can render this component
+ * - Works with React Navigation
  *
  * Backend endpoints assumed:
  *   POST /api/auth/login     { email, password, remember }
@@ -21,7 +24,7 @@ import { Text, TextInput, Button, HelperText, ActivityIndicator, Divider } from 
 type Mode = "login" | "register";
 
 interface Props {
-  onSuccess?: () => void; // Called after successful login
+  onSuccess?: () => void;
 }
 
 const emailRegex = /[^@\s]+@[^@\s]+\.[^@\s]+/;
@@ -39,13 +42,15 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
   const [message, setMessage] = useState<string | null>(null);
 
   const resetMessages = () => { setError(null); setMessage(null); };
+    const navigation =
+      useNavigation<StackNavigationProp<RootParamList, 'Login'>>();
 
   const validate = () => {
-    if (!emailRegex.test(email)) return "Email không hợp lệ";
-    if (password.length < 8) return "Mật khẩu cần tối thiểu 8 ký tự";
+    if (!emailRegex.test(email)) return "Invalid email address";
+    if (password.length < 8) return "Password must be at least 8 characters";
     if (mode === "register") {
-      if (!name.trim()) return "Vui lòng nhập tên";
-      if (password !== confirmPassword) return "Mật khẩu nhập lại không khớp";
+      if (!name.trim()) return "Please enter your name";
+      if (password !== confirmPassword) return "Passwords do not match";
     }
     return null;
   };
@@ -70,18 +75,20 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data && (data.error || data.message)) || "Đã có lỗi xảy ra");
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || "An error occurred");
 
-      if (mode === "login") {        if (data?.token && remember) {
-               await AsyncStorage.setItem("auth_token", String(data.token));
-             }     setMessage("Đăng nhập thành công!");
-                 onSuccess?.();
+      if (mode === "login") {
+        if (data?.token && remember) {
+          await AsyncStorage.setItem("auth_token", String(data.token));
+        }
+        setMessage("Login successful!");
+        navigation.navigate('BottomTabNavigation', {screen: 'HomeScreen'});
       } else {
-        setMessage("Đăng kí thành công! Hãy đăng nhập.");
+        setMessage("Registration successful! Please log in.");
         setMode("login");
       }
     } catch (e: any) {
-      setError(e?.message || "Không thể kết nối máy chủ");
+      setError(e?.message || "Cannot connect to the server");
     } finally {
       setLoading(false);
     }
@@ -91,12 +98,12 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title} variant="headlineMedium">
-          {mode === "login" ? "Đăng nhập" : "Đăng kí tài khoản"}
+          {mode === "login" ? "Sign In" : "Create an Account"}
         </Text>
         <Text style={styles.subtitle} variant="bodyMedium">
           {mode === "login"
-            ? "Chào mừng bạn quay lại ứng dụng Plant Identifier"
-            : "Tạo tài khoản để sử dụng ứng dụng Plant Identifier"}
+            ? "Welcome back to Plant Identifier"
+            : "Create an account to use Plant Identifier"}
         </Text>
 
         {!!error && <HelperText type="error" visible>{error}</HelperText>}
@@ -104,7 +111,7 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
 
         {mode === "register" && (
           <TextInput
-            label="Họ và tên"
+            label="Full Name"
             value={name}
             onChangeText={setName}
             mode="outlined"
@@ -124,7 +131,7 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
         />
 
         <TextInput
-          label="Mật khẩu"
+          label="Password"
           value={password}
           onChangeText={setPassword}
           mode="outlined"
@@ -135,7 +142,7 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
 
         {mode === "register" && (
           <TextInput
-            label="Nhập lại mật khẩu"
+            label="Confirm Password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             mode="outlined"
@@ -147,50 +154,50 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
         {mode === "login" && (
           <TouchableOpacity onPress={() => setRemember((r) => !r)} style={styles.rememberRow}>
             <View style={[styles.checkbox, remember && styles.checkboxChecked]} />
-            <Text>Ghi nhớ đăng nhập</Text>
-            <View style={{flex:1}} />
-            <TouchableOpacity onPress={() => {/* navigate to forgot password screen */}}>
-              <Text style={styles.link}>Quên mật khẩu?</Text>
+            <Text>Remember me</Text>
+            <View style={{ flex: 1 }} />
+            <TouchableOpacity onPress={() => { /* navigate to forgot password screen */ }}>
+              <Text style={styles.link}>Forgot password?</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         )}
 
         <Button mode="contained" onPress={handleSubmit} disabled={loading} style={styles.submit}>
-          {loading ? <ActivityIndicator animating /> : (mode === "login" ? "Đăng nhập" : "Tạo tài khoản")}
+          {loading ? <ActivityIndicator animating /> : (mode === "login" ? "Sign In" : "Create Account")}
         </Button>
 
         <View style={styles.dividerRow}>
           <Divider style={{ flex: 1 }} />
-          <Text style={{ marginHorizontal: 8 }}>Hoặc</Text>
+          <Text style={{ marginHorizontal: 8 }}>Or</Text>
           <Divider style={{ flex: 1 }} />
         </View>
 
         <Button mode="outlined" onPress={() => { /* open /api/auth/oauth/google */ }} style={styles.oauthBtn}>
-          Tiếp tục với Google
+          Continue with Google
         </Button>
         <Button mode="outlined" onPress={() => { /* open /api/auth/oauth/github */ }} style={styles.oauthBtn}>
-          Tiếp tục với GitHub
+          Continue with GitHub
         </Button>
 
         <View style={styles.bottomRow}>
           {mode === "login" ? (
             <>
-              <Text>Chưa có tài khoản? </Text>
+              <Text>Don’t have an account? </Text>
               <TouchableOpacity onPress={() => { resetMessages(); setMode("register"); }}>
-                <Text style={styles.link}>Đăng kí ngay</Text>
+                <Text style={styles.link}>Register now</Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
-              <Text>Đã có tài khoản? </Text>
+              <Text>Already have an account? </Text>
               <TouchableOpacity onPress={() => { resetMessages(); setMode("login"); }}>
-                <Text style={styles.link}>Đăng nhập</Text>
+                <Text style={styles.link}>Sign in</Text>
               </TouchableOpacity>
             </>
           )}
         </View>
         <Text style={styles.footer}>
-          Bằng việc tiếp tục, bạn đồng ý với Điều khoản & Chính sách bảo mật.
+          By continuing, you agree to the Terms & Privacy Policy.
         </Text>
       </View>
     </View>
