@@ -32,6 +32,7 @@ import AddReminderScreen from '~/screens/addReminder/AddReminderScreen';
 import SelectPlantScreen from '~/screens/addReminder/SelectPlantScreen';
 import SelectTaskScreen from '~/screens/addReminder/SelectTaskScreen';
 import SelectScheduleScreen from '~/screens/addReminder/SelectScheduleScreen';
+import Login from '~/screens/authen/login';
 
 //Type for RootParamList, contains param pass through each screen
 export type RootParamList = {
@@ -61,6 +62,7 @@ export type RootParamList = {
   CommonProblemDetailScreen: t_ProblemDetail;
   SearchScreen: {searchValue: string | undefined};
   FilterScreen: undefined;
+  Login: undefined;
   PlantDetailScreen: t_PlantDetail;
   CareGuideDetailScreen: t_CareGuideDetail;
   ExploreDetailScreen: {
@@ -146,6 +148,11 @@ const RootNavigation = () => {
       <Stack.Screen
         name="SplashScreen"
         component={SplashScreen}
+        options={{gestureEnabled: false}}
+      />
+      <Stack.Screen
+        name="Login"
+        component={Login}
         options={{gestureEnabled: false}}
       />
       <Stack.Screen
