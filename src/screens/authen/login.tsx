@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, TextInput, Button, HelperText, ActivityIndicator, Divider } from "react-native-paper";
 
 /**
@@ -56,7 +57,9 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
 
     setLoading(true);
     try {
-      const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const API_BASE = (process.env.EXPO_PUBLIC_API_BASE_URL as string)
+        || (Platform.OS === "android" ? "http://10.0.2.2:3000" : "http://localhost:3000");
+      const endpoint = mode === "login" ? `${API_BASE}/api/auth/login` : `${API_BASE}/api/auth/register`;
       const payload: Record<string, unknown> = { email, password };
       if (mode === "register") payload.name = name;
       if (mode === "login") payload.remember = remember;
@@ -69,9 +72,10 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error((data && (data.error || data.message)) || "Đã có lỗi xảy ra");
 
-      if (mode === "login") {
-        setMessage("Đăng nhập thành công!");
-        onSuccess?.();
+      if (mode === "login") {        if (data?.token && remember) {
+               await AsyncStorage.setItem("auth_token", String(data.token));
+             }     setMessage("Đăng nhập thành công!");
+                 onSuccess?.();
       } else {
         setMessage("Đăng kí thành công! Hãy đăng nhập.");
         setMode("login");
