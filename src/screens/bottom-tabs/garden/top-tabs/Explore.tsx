@@ -18,8 +18,6 @@ import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import i18n from '~/i18n';
 import LottieView from 'lottie-react-native';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
-import NativeItemExplore from '~/components/ads/NativeItemExplore';
 
 export type t_ExplorePost = {
   id: string;
@@ -78,8 +76,6 @@ const Explore = () => {
   }, []);
   const [listPost, setListPost] = useState<t_ExplorePost[]>([]);
   const [loading, setLoading] = useState(true);
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_EXPLORE.id;
 
   const handNavitoDetail = (post: t_ExplorePost) => {
     navigation.navigate('ExploreDetailScreen', {
@@ -155,9 +151,6 @@ const Explore = () => {
                     <Text style={styles.title}>{item.title}</Text>
                   </View>
                 </TouchableOpacity>
-                {(index + 1) % 5 == 0 && adsRemote.NATIVE_ITEM_EXPLORE.isOn && (
-                  <NativeItemExplore adId={ID_ADS_ITEM} />
-                )}
               </View>
             ))}
           </View>

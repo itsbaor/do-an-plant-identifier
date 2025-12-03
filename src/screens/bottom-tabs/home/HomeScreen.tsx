@@ -41,9 +41,6 @@ import {Notifier, NotifierComponents} from 'react-native-notifier';
 import {useModal} from 'react-native-modalfy';
 import {resolveResponseFromAi} from '~/utils';
 import {e_CamFunc} from '../ScanScreen';
-import {useInterstitialAd, TestIds} from 'react-native-google-mobile-ads';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {KEY_PLANT_LIST} from '../garden/top-tabs/MyGarden';
 import {
@@ -54,7 +51,6 @@ import {KEY_REMINDER_LIST} from '../garden/top-tabs/Reminder';
 import {setStateReminderStorage} from '~/redux/slices/reminderStorageSlice';
 import {findSmallestKeyValue, incrementMapValue} from '~/screens/SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import NativeItemHome from '~/components/ads/NativeItemHome';
 import {t_Lang} from '~/@types/language';
 import {stateLang} from '~/redux/slices/langSlices';
 
@@ -111,29 +107,15 @@ const HomeScreen = () => {
   const g_plantStorage = useAppSelector(statePlantStorage);
   const g_aiKey = useAppSelector(stateKeyAi);
   const g_lang = useAppSelector(stateLang);
-  const adsRemote = useAppSelector(stateAdsRemote);
   const theme = useAppTheme();
   const [searchText, setSearchText] = useState<string>();
   const [selectedPlantCal, setSelectedPlantCal] = useState<string>('');
-  const [waitNativeAds, setWaitNativeAds] = useState<boolean>(
-    adsRemote.NATIVE_ITEM_HOME.isOn,
-  );
   const {openModal, closeModals} = useModal();
   const [homePlantList, setHomePlantList] = useState<t_PlantType[]>(
     plantData.slice(0, 9),
   );
   const [categorySelectedLabel, setCategorySelectedLabel] =
     useState<e_CategoryLabel>(e_CategoryLabel.ALL);
-  const ID_ADS_LIGHT_METER = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_LIGHT_METER.id;
-
-  const ID_ADS_CACULATOR = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_WATER_CACULATOR.id;
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_HOME.id;
-  const adsLightMeter = useInterstitialAd(ID_ADS_LIGHT_METER);
-  const adsCaculator = useInterstitialAd(ID_ADS_CACULATOR);
   const homeTrans = [
     t('All'),
     t('Outdoor'),
@@ -185,14 +167,7 @@ const HomeScreen = () => {
   };
 
   const navigateToLightMeterScreen = () => {
-    if (adsRemote.INTER_LIGHT_METER.isOn) {
-      openModal('LoadingModal', {
-        message: t('Loading ads...'),
-      });
-      adsLightMeter.load();
-    } else {
-      navigation.navigate('LightMeterScreen');
-    }
+    navigation.navigate('LightMeterScreen');
   };
 
   const navigateToReminderScreen = () => {
@@ -262,53 +237,9 @@ const HomeScreen = () => {
   const handleNavigateCaculationScreen = (plantName: string) => {
     setSelectedPlantCal(plantName);
     closeModals('ChoosePlantModal', () => {
-      if (adsRemote.INTER_WATER_CACULATOR.isOn) {
-        openModal('LoadingModal', {
-          message: t('Loading ads...'),
-        });
-        adsCaculator.load();
-      } else {
-        navigation.navigate('WaterCaculatorScreen', {plantName});
-      }
+      navigation.navigate('WaterCaculatorScreen', {plantName});
     });
   };
-
-  useEffect(() => {
-    if (adsRemote.INTER_LIGHT_METER.isOn && adsLightMeter.isLoaded) {
-      dispatch(setStateAdsOpen(false));
-      closeModals('LoadingModal');
-      adsLightMeter.show();
-      navigation.navigate('LightMeterScreen');
-    }
-  }, [adsLightMeter.isLoaded]);
-
-  useEffect(() => {
-    if (adsRemote.INTER_LIGHT_METER.isOn && adsLightMeter.error) {
-      closeModals('LoadingModal');
-      navigation.navigate('LightMeterScreen');
-    }
-  }, [adsLightMeter.error]);
-
-  //Load inter water caculator ads
-  useEffect(() => {
-    if (adsRemote.INTER_WATER_CACULATOR.isOn && adsCaculator.isLoaded) {
-      dispatch(setStateAdsOpen(false));
-      closeModals('LoadingModal');
-      adsCaculator.show();
-      navigation.navigate('WaterCaculatorScreen', {
-        plantName: selectedPlantCal,
-      });
-    }
-  }, [adsCaculator.isLoaded]);
-
-  useEffect(() => {
-    if (adsRemote.INTER_WATER_CACULATOR.isOn && adsCaculator.error) {
-      closeModals('LoadingModal');
-      navigation.navigate('WaterCaculatorScreen', {
-        plantName: selectedPlantCal,
-      });
-    }
-  }, [adsCaculator.error]);
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -558,25 +489,15 @@ const HomeScreen = () => {
           ))}
         </View>
         <ScrollView style={[{marginTop: 24}]} horizontal={true}>
-          {homePlantList.map((plant, index) =>
-            (index + 1) % 4 == 0 ? (
-              adsRemote.NATIVE_ITEM_HOME.isOn && (
-                <NativeItemHome
-                  key={index}
-                  adId={ID_ADS_ITEM}
-                  setWaitAds={setWaitNativeAds}
-                />
-              )
-            ) : (
-              <CategoryResultComponent
-                key={index}
-                label={plant.category}
-                name={t(plant.name)}
-                image={plant.image}
-                onPress={() => navigateDetailPlant(plant)}
-              />
-            ),
-          )}
+          {homePlantList.map((plant, index) => (
+            <CategoryResultComponent
+              key={index}
+              label={plant.category}
+              name={t(plant.name)}
+              image={plant.image}
+              onPress={() => navigateDetailPlant(plant)}
+            />
+          ))}
         </ScrollView>
         {/* Last block */}
         <View style={{height: 40}}></View>

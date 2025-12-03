@@ -21,10 +21,7 @@ import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import {commonProblemData} from '~/data/commonProblemData';
 import IconBack from '~/resources/icons/IconBack';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-import Config from 'react-native-config';
 import {t_ProblemObject} from '~/@types/common-problem';
 import NoDataFoundComponent from '~/components/NoDataFoundComponent';
 import SearchBar from '~/components/SearchBar';
@@ -35,7 +32,6 @@ import {resolveResponseFromAi} from '~/utils';
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {findSmallestKeyValue, incrementMapValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import NativeItemProblemCare from '~/components/ads/NativeItemProblemCare';
 import {t_Lang} from '~/@types/language';
 import {stateLang} from '~/redux/slices/langSlices';
 
@@ -78,17 +74,11 @@ const CommonProblemScreen = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootParamList, 'CommonProblemScreen'>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const g_aiKey = useAppSelector(stateKeyAi);
   const g_lang = useAppSelector(stateLang);
   const isPre = useAppSelector(statePremium);
   const theme = useAppTheme();
   const [searchText, setSearchText] = useState<string>();
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_COMMON_PROBLEMS.isOn,
-  );
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_PROBLEM.id;
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_COMMON_PROBLEMS.id;
   const [problemData, setProblemData] = useState<t_ProblemObject[]>([]);
 
   const handleGoToProblem = async (
@@ -139,13 +129,6 @@ const CommonProblemScreen = () => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    waitingAds &&
-      openModal('LoadingModal', {
-        message: t('Loading data...'),
-      });
-    !waitingAds && closeModals('LoadingModal');
-  }, [waitingAds]);
 
   useEffect(() => {
     const startIndex = Math.floor(
@@ -183,9 +166,7 @@ const CommonProblemScreen = () => {
           },
         ]}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          disabled={waitingAds}
-          style={[waitingAds && {opacity: 0.5}]}>
+          onPress={() => navigation.goBack()}>
           <IconBack />
         </TouchableOpacity>
         <Text style={[styles.header, {color: theme.colors.primary_dark}]}>
@@ -212,74 +193,54 @@ const CommonProblemScreen = () => {
         ) : (
           <ScrollView style={{paddingHorizontal: 20}}>
             <View style={styles.categoryListContainer}>
-              {problemData.map((item, index) =>
-                (index + 1) % 8 == 0 && adsRemote.NATIVE_ITEM_PROBLEM.isOn ? (
-                  <View
-                    key={index}
-                    style={{
-                      width: '50%',
-                      aspectRatio: 180 / 210,
-                      marginBottom: 15,
-                      paddingHorizontal: 4,
-                    }}>
-                    <NativeItemProblemCare adId={ID_ADS_ITEM} />
+              {problemData.map((item, index) => (
+                <View
+                  key={index}
+                  style={{
+                    width: '50%',
+                    aspectRatio: 180 / 210,
+                    marginBottom: 15,
+                    paddingHorizontal: 4,
+                  }}>
+                  <View key={index} style={[styles.categoryItemContainer]}>
+                    <TouchableOpacity
+                      style={[styles.categoryItem]}
+                      onPress={() => {
+                        handleGoToProblem(
+                          item.name,
+                          item.image,
+                          item.otherName,
+                        );
+                      }}>
+                      <View style={{flex: 1}}>
+                        <Image
+                          style={{
+                            height: '100%',
+                            width: '100%',
+                            borderTopLeftRadius: 5,
+                            borderTopRightRadius: 5,
+                          }}
+                          resizeMode="cover"
+                          source={
+                            item.image as unknown as
+                              | ImageSourcePropType
+                              | undefined
+                          }
+                        />
+                      </View>
+                      <View style={{paddingVertical: 8, paddingLeft: 10}}>
+                        <Text style={[styles.textName]} numberOfLines={1}>
+                          {t(item.name)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
                   </View>
-                ) : (
-                  <View
-                    key={index}
-                    style={{
-                      width: '50%',
-                      aspectRatio: 180 / 210,
-                      marginBottom: 15,
-                      paddingHorizontal: 4,
-                    }}>
-                    <View key={index} style={[styles.categoryItemContainer]}>
-                      <TouchableOpacity
-                        disabled={waitingAds}
-                        style={[
-                          styles.categoryItem,
-                          waitingAds && {opacity: 0.5},
-                        ]}
-                        onPress={() => {
-                          handleGoToProblem(
-                            item.name,
-                            item.image,
-                            item.otherName,
-                          );
-                        }}>
-                        <View style={{flex: 1}}>
-                          <Image
-                            style={{
-                              height: '100%',
-                              width: '100%',
-                              borderTopLeftRadius: 5,
-                              borderTopRightRadius: 5,
-                            }}
-                            resizeMode="cover"
-                            source={
-                              item.image as unknown as
-                                | ImageSourcePropType
-                                | undefined
-                            }
-                          />
-                        </View>
-                        <View style={{paddingVertical: 8, paddingLeft: 10}}>
-                          <Text style={[styles.textName]} numberOfLines={1}>
-                            {t(item.name)}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ),
-              )}
+                </View>
+              ))}
             </View>
           </ScrollView>
         )}
       </View>
-      {adsRemote.NATIVE_COMMON_PROBLEMS.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

@@ -14,8 +14,6 @@ import DiagnoseScreen from '~/screens/bottom-tabs/diagnose/DiagnoseScreen';
 import GardenScreen, {
   TopTabParamList,
 } from '~/screens/bottom-tabs/garden/GardenScreen';
-import {BannerAd, BannerAdSize, TestIds} from 'react-native-google-mobile-ads';
-import Config from 'react-native-config';
 import {useAppTheme} from '~/resources/theme';
 import {
   NavigatorScreenParams,
@@ -31,7 +29,6 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from './RootNavigation';
 import IconDiagnose from '~/resources/icons/bottom-tabs/IconDiagnose';
 import IconGarden from '~/resources/icons/bottom-tabs/IconGarden';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {useAppSelector} from '~/hooks/useReduxStore';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import {e_CamFunc} from '~/screens/bottom-tabs/ScanScreen';
@@ -51,14 +48,9 @@ const BottomTabNavigation = () => {
   const theme = useAppTheme();
   const {t} = useTranslation();
   const [showBanner, setShowBanner] = useState<boolean>(true);
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const navigation =
     useNavigation<StackNavigationProp<RootParamList, 'BottomTabNavigation'>>();
-  const ID_BANNER_HOME = useMemo(
-    () => (__DEV__ ? TestIds.BANNER : adsRemote.BANNER_HOME.id),
-    [adsRemote],
-  );
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -212,13 +204,6 @@ const BottomTabNavigation = () => {
           }}
         />
       </Tab.Navigator>
-      {showBanner && adsRemote.BANNER_HOME.isOn && !isPre && (
-        <BannerAd
-          unitId={ID_BANNER_HOME}
-          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          requestOptions={{requestNonPersonalizedAdsOnly: true}}
-        />
-      )}
     </>
   );
 };

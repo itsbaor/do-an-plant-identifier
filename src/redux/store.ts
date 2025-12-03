@@ -3,8 +3,6 @@ import {configureStore} from '@reduxjs/toolkit';
 import counterSlice from './slices/counterSlice';
 import nameSlice from './slices/nameSlice';
 import langSlice from './slices/langSlices';
-import adsOpenSlice from './slices/adsOpenSlice';
-import adsRemoteSlice from './slices/adsRemoteSlice';
 import premiumSlice from './slices/premiumSlice';
 import startChatSlice from './slices/startChatSlice';
 import chatSlice from './slices/chatDataSlice';
@@ -24,8 +22,6 @@ export const store = configureStore({
     counter: counterSlice,
     name: nameSlice,
     lang: langSlice,
-    adsOpen: adsOpenSlice,
-    adsRemote: adsRemoteSlice,
     premium: premiumSlice,
     startChat: startChatSlice,
     chat: chatSlice,

@@ -55,38 +55,38 @@ const PremiumScreen = () => {
   const route = useRoute<RouteProp<RootParamList, 'PremiumScreen'>>();
   const appStart = route.params.appStart;
 
-  useEffect(() => {
-    const handleGetProducts = async () => {
-      try {
-        // openModal('LoadingModal', {
-        //   message: t('Loading...'),
-        // });
-        await initConnection().then(async () => {
-          await getSubscriptions({
-            skus: [itemIdAndroid.WEEKLY, itemIdAndroid.YEARLY],
-          }).then(item => {
-            const weeklyItem = item[0] as t_Subcription;
-            const yearlyItem = item[1] as t_Subcription;
-            setWeekly(weeklyItem.subscriptionOfferDetails[0]);
-            setYearly(yearlyItem.subscriptionOfferDetails[0]);
-          });
-        });
-        // closeModals('LoadingModal');
-      } catch (error) {
-        // closeModals('LoadingModal');
-        Notifier.showNotification({
-          title: 'Oopss!',
-          description: t('Error when getting subs! Please try again later.'),
-          Component: NotifierComponents.Alert,
-          componentProps: {
-            alertType: 'error',
-          },
-        });
-        navigation.goBack();
-      }
-    };
-    Platform.OS === 'android' && handleGetProducts();
-  }, []);
+  // useEffect(() => {
+  //   const handleGetProducts = async () => {
+  //     try {
+  //       // openModal('LoadingModal', {
+  //       //   message: t('Loading...'),
+  //       // });
+  //       await initConnection().then(async () => {
+  //         await getSubscriptions({
+  //           skus: [itemIdAndroid.WEEKLY, itemIdAndroid.YEARLY],
+  //         }).then(item => {
+  //           const weeklyItem = item[0] as t_Subcription;
+  //           const yearlyItem = item[1] as t_Subcription;
+  //           setWeekly(weeklyItem.subscriptionOfferDetails[0]);
+  //           setYearly(yearlyItem.subscriptionOfferDetails[0]);
+  //         });
+  //       });
+  //       // closeModals('LoadingModal');
+  //     } catch (error) {
+  //       // closeModals('LoadingModal');
+  //       Notifier.showNotification({
+  //         title: 'Oopss!',
+  //         description: t('Error when getting subs! Please try again later.'),
+  //         Component: NotifierComponents.Alert,
+  //         componentProps: {
+  //           alertType: 'error',
+  //         },
+  //       });
+  //       navigation.goBack();
+  //     }
+  //   };
+  //   Platform.OS === 'android' && handleGetProducts();
+  // }, []);
 
   useEffect(() => {
     setIsDisabled(selectedPurchase == PURCHASE.NONE);

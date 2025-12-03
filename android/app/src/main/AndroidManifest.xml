@@ -8,8 +8,7 @@
     <uses-permission android:name="com.android.vending.BILLING"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Uncomment this to remove permission to the ads -->
-    <!-- <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/> -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
@@ -18,23 +17,8 @@
       android:allowBackup="false"
       android:theme="@style/AppTheme"
       android:supportsRtl="true">
-      <!-- Add config handle analytic, crashlytic bug -->
-      <property
-        android:name="android.adservices.AD_SERVICES_CONFIG"
-        android:resource="@xml/gma_ad_services_config"
-        tools:replace="android:resource" />
-      <!-- Add config handle analytic, crashlytic bug -->
       <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
       <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
-      <meta-data
-        android:name="com.google.android.gms.ads.APPLICATION_ID"
-        android:value="ca-app-pub-5540714455115639~3961114748"/>
-      <meta-data
-        android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
-        android:value="true"/>
-      <meta-data
-        android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
-        android:value="true"/>
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

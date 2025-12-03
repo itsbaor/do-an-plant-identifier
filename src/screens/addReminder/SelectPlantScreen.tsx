@@ -9,11 +9,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import PlantItem from '~/components/search/PlantItem';
 import {statePlantStorage} from '~/redux/slices/plantStorageSlice';
 import {setStateReminder, stateReminder} from '~/redux/slices/reminderSlice';
@@ -24,14 +22,9 @@ const SelectPlantScreen = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootParamList, 'SelectPlantScreen'>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const g_plantStorage = useAppSelector(statePlantStorage);
   const g_reminder = useAppSelector(stateReminder);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_REMINDER.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_REMINDER.id;
 
   const theme = useAppTheme();
 
@@ -49,7 +42,6 @@ const SelectPlantScreen = () => {
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
         title={t('Select a plant')}
-        waitingAds={waitingAds}
       />
       <View style={{flex: 1, paddingHorizontal: 20, gap: 15}}>
         <Text style={{fontSize: 18, color: theme.colors.text_black}}>
@@ -64,15 +56,11 @@ const SelectPlantScreen = () => {
                 handleOpenDetails={() =>
                   handleChoosePlantReminder(plant.name, plant.image)
                 }
-                isDisable={waitingAds}
               />
             ))}
           </ScrollView>
         </View>
       </View>
-      {adsRemote.NATIVE_REMINDER.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

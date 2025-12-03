@@ -22,13 +22,9 @@ import {onBoardingData} from '~/data/onBoardingData';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import Swiper from 'react-native-swiper';
-import NativeBanner from '~/components/ads/NativeBanner';
-import Config from 'react-native-config';
 import OnBoardingComponent from '~/components/onBoarding/OnBoardingComponent';
 import {useModal} from 'react-native-modalfy';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
-import NativeFull from '~/components/ads/NativeFull';
 import IconBack from '~/resources/icons/IconBack';
 
 const OnBoardingScreen = () => {
@@ -41,32 +37,8 @@ const OnBoardingScreen = () => {
   const swiper = useRef<Swiper>(null);
   const [index, setIndex] = useState(0);
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const dotData = adsRemote.ONBOARDING_FULL?.isOn
-    ? [{id: 0}, {id: 1}, {id: 2}, {id: 3}]
-    : [{id: 0}, {id: 1}, {id: 2}];
+  const dotData = [{id: 0}, {id: 1}, {id: 2}];
   const isPre = useAppSelector(statePremium);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_ONBOARDING?.isOn,
-  );
-  const [errorLoadAdsFull, setErrorLoadAdsFull] = useState<boolean>(false);
-
-  const ID_NATIVE_FULL = useMemo(
-    () => adsRemote.ONBOARDING_FULL.id,
-    [adsRemote],
-  );
-  const ID_OB = useMemo(
-    () => (__DEV__ ? undefined : adsRemote.NATIVE_ONBOARDING.id),
-    [adsRemote],
-  );
-  const ID_OB_2 = useMemo(
-    () => (__DEV__ ? undefined : adsRemote.NATIVE_ONBOARDING_2.id),
-    [adsRemote],
-  );
-  const ID_OB_3 = useMemo(
-    () => (__DEV__ ? undefined : adsRemote.NATIVE_ONBOARDING_3.id),
-    [adsRemote],
-  );
   const trans = [
     t('Smart Plants Diagnosis & Identification'),
     t('Nurture Your Greenery'),
@@ -78,11 +50,7 @@ const OnBoardingScreen = () => {
       handleGoToHome();
     } else {
       let newIndex = index + 1;
-      if (adsRemote.ONBOARDING_FULL?.isOn) {
-        swiper.current?.scrollBy(newIndex == 1 ? index : newIndex);
-      } else {
-        swiper.current?.scrollBy(newIndex);
-      }
+      swiper.current?.scrollBy(newIndex);
       handleOnIndexChange(newIndex);
     }
   };
@@ -102,24 +70,7 @@ const OnBoardingScreen = () => {
 
   const handleOnIndexChange = (item: number) => {
     setIndex(item);
-    if (dotData.length == 3) {
-      item == 0 && setWaitingAds(adsRemote.NATIVE_ONBOARDING.isOn);
-      item == 1 && setWaitingAds(adsRemote.NATIVE_ONBOARDING_2.isOn);
-      item == 2 && setWaitingAds(adsRemote.NATIVE_ONBOARDING_3.isOn);
-    } else {
-      item == 0 && setWaitingAds(adsRemote.NATIVE_ONBOARDING.isOn);
-      item == 1 && setWaitingAds(adsRemote.ONBOARDING_FULL.isOn);
-      item == 2 && setWaitingAds(adsRemote.NATIVE_ONBOARDING_2.isOn);
-      item == 3 && setWaitingAds(adsRemote.NATIVE_ONBOARDING_3.isOn);
-    }
   };
-
-  useEffect(() => {
-    if (errorLoadAdsFull) {
-      handlePressNextButton();
-      setErrorLoadAdsFull(false);
-    }
-  }, [errorLoadAdsFull]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -134,46 +85,37 @@ const OnBoardingScreen = () => {
   return (
     <SafeAreaView
       style={[styles.container, {backgroundColor: theme.colors.bg_white}]}>
-      {((index !== 1 && adsRemote.ONBOARDING_FULL?.isOn) ||
-        !adsRemote.ONBOARDING_FULL?.isOn) && (
-        <>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            disabled={waitingAds}
-            style={{
-              position: 'absolute',
-              top: 20,
-              left: 20,
-              zIndex: 10,
-              opacity: waitingAds ? 0.5 : 1,
-            }}>
-            <IconBack />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleGoToHome}
-            disabled={waitingAds}
-            style={{
-              position: 'absolute',
-              top: 20,
-              right: 20,
-              backgroundColor: theme.colors.primary,
-              borderRadius: 30,
-              zIndex: 10,
-              paddingHorizontal: 15,
-              paddingVertical: 3,
-              opacity: waitingAds ? 0.5 : 1,
-            }}>
-            <Text
-              style={{
-                color: theme.colors.text_white,
-                fontSize: 16,
-                fontWeight: '600',
-              }}>
-              {t('Skip')}
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          zIndex: 10,
+        }}>
+        <IconBack />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={handleGoToHome}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          backgroundColor: theme.colors.primary,
+          borderRadius: 30,
+          zIndex: 10,
+          paddingHorizontal: 15,
+          paddingVertical: 3,
+        }}>
+        <Text
+          style={{
+            color: theme.colors.text_white,
+            fontSize: 16,
+            fontWeight: '600',
+          }}>
+          {t('Skip')}
+        </Text>
+      </TouchableOpacity>
       <View
         style={{
           flex: 1,
@@ -182,7 +124,7 @@ const OnBoardingScreen = () => {
         }}>
         <View style={[{flex: 1}]}>
           <Swiper
-            scrollEnabled={!waitingAds}
+            scrollEnabled={true}
             showsButtons={false}
             loop={false}
             ref={swiper}
@@ -211,29 +153,6 @@ const OnBoardingScreen = () => {
                 image={onBoardingData[0].image}
               />
             </View>
-            {adsRemote.ONBOARDING_FULL?.isOn && (
-              <View
-                style={[
-                  StyleSheet.absoluteFillObject,
-                  {
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                  },
-                ]}>
-                {index === 1 && (
-                  <NativeFull
-                    adId={ID_NATIVE_FULL}
-                    setWaitAds={setWaitingAds}
-                    handleActionLoadFail={() => {
-                      let newIndex = index + 1;
-                      swiper.current?.scrollBy(index);
-                      handleOnIndexChange(newIndex);
-                    }}
-                  />
-                )}
-              </View>
-            )}
             <View key={index} style={{flex: 1, justifyContent: 'flex-start'}}>
               <OnBoardingComponent
                 title={t(onBoardingData[1].title)}
@@ -248,83 +167,60 @@ const OnBoardingScreen = () => {
             </View>
           </Swiper>
         </View>
-        {((index !== 1 && adsRemote.ONBOARDING_FULL?.isOn) ||
-          !adsRemote.ONBOARDING_FULL?.isOn) && (
-          <>
-            {/* Dot */}
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-                gap: 15,
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                }}>
-                {dotData.map((item, mIndex) => {
-                  const width = scrollX.interpolate({
-                    inputRange: [
-                      windowWidth * (item.id - 1),
-                      windowWidth * item.id,
-                      windowWidth * (item.id + 1),
-                    ],
-                    outputRange: [9, 25, 9],
-                    extrapolate: 'clamp',
-                  });
-                  const backgroundColor = scrollX.interpolate({
-                    inputRange: [
-                      windowWidth * (item.id - 1),
-                      windowWidth * item.id,
-                      windowWidth * (item.id + 1),
-                    ],
-                    outputRange: ['#D9D9D9', '#4B6D4E', '#D9D9D9'],
-                    extrapolate: 'clamp',
-                  });
-                  return (
-                    <Animated.View
-                      key={mIndex}
-                      style={[styles.normalDot, {width, backgroundColor}]}
-                    />
-                  );
-                })}
-              </View>
-            </View>
-            {/* Next button */}
-            <View style={[styles.buttonContainer]}>
-              <TouchableOpacity
-                disabled={waitingAds}
-                onPress={handlePressNextButton}
-                style={[
-                  styles.button,
-                  {backgroundColor: theme.colors.primary},
-                  waitingAds && {opacity: 0.5},
-                ]}>
-                <Text
-                  style={[styles.buttonText, {color: theme.colors.text_white}]}>
-                  {t('Next')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+        {/* Dot */}
+        <View
+          style={{
+            width: '100%',
+            alignItems: 'center',
+            gap: 15,
+          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            {dotData.map((item, mIndex) => {
+              const width = scrollX.interpolate({
+                inputRange: [
+                  windowWidth * (item.id - 1),
+                  windowWidth * item.id,
+                  windowWidth * (item.id + 1),
+                ],
+                outputRange: [9, 25, 9],
+                extrapolate: 'clamp',
+              });
+              const backgroundColor = scrollX.interpolate({
+                inputRange: [
+                  windowWidth * (item.id - 1),
+                  windowWidth * item.id,
+                  windowWidth * (item.id + 1),
+                ],
+                outputRange: ['#D9D9D9', '#4B6D4E', '#D9D9D9'],
+                extrapolate: 'clamp',
+              });
+              return (
+                <Animated.View
+                  key={mIndex}
+                  style={[styles.normalDot, {width, backgroundColor}]}
+                />
+              );
+            })}
+          </View>
+        </View>
+        {/* Next button */}
+        <View style={[styles.buttonContainer]}>
+          <TouchableOpacity
+            onPress={handlePressNextButton}
+            style={[
+              styles.button,
+              {backgroundColor: theme.colors.primary},
+            ]}>
+            <Text
+              style={[styles.buttonText, {color: theme.colors.text_white}]}>
+              {t('Next')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      {adsRemote.NATIVE_ONBOARDING.isOn && index == 0 && (
-        <NativeBanner adId={ID_OB} setWaitAds={setWaitingAds} />
-      )}
-      {adsRemote.NATIVE_ONBOARDING_2.isOn &&
-        index == 1 &&
-        dotData.length == 3 && (
-          <NativeBanner adId={ID_OB_2} setWaitAds={setWaitingAds} />
-        )}
-      {adsRemote.NATIVE_ONBOARDING_2.isOn &&
-        index == 2 &&
-        dotData.length == 4 && (
-          <NativeBanner adId={ID_OB_2} setWaitAds={setWaitingAds} />
-        )}
-      {adsRemote.NATIVE_ONBOARDING_3.isOn && index == dotData.length - 1 && (
-        <NativeBanner adId={ID_OB_3} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

@@ -15,7 +15,6 @@ import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import {
@@ -23,11 +22,8 @@ import {
   t_ExplorePost,
 } from './bottom-tabs/garden/top-tabs/Explore';
 import IconBack from '~/resources/icons/IconBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-import Config from 'react-native-config';
 import {useModal} from 'react-native-modalfy';
 import LottieView from 'lottie-react-native';
-import NativeItemExplore from '~/components/ads/NativeItemExplore';
 
 const ExploreDetailScreen = () => {
   const {t} = useTranslation();
@@ -36,17 +32,11 @@ const ExploreDetailScreen = () => {
     useNavigation<StackNavigationProp<RootParamList, 'ExploreDetailScreen'>>();
   const route = useRoute<RouteProp<RootParamList, 'ExploreDetailScreen'>>();
   const theme = useAppTheme();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const [postDetail, setPostDetail] = useState<t_ExplorePost>(route.params);
   const [listPost, setListPost] = useState<t_ExplorePost[]>([]);
   const [listPostShow, setListPostShow] = useState<t_ExplorePost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_EXPLORE.id;
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
   const pageRandom = useMemo(() => {
     const min = 1;
     const max = 10;
@@ -76,13 +66,6 @@ const ExploreDetailScreen = () => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    waitingAds &&
-      openModal('LoadingModal', {
-        message: t('Loading data...'),
-      });
-    !waitingAds && closeModals('LoadingModal');
-  }, [waitingAds]);
 
   return (
     <SafeAreaView
@@ -195,17 +178,11 @@ const ExploreDetailScreen = () => {
                     <Text style={styles.title}>{item.title}</Text>
                   </View>
                 </TouchableOpacity>
-                {(index + 1) % 5 == 0 && adsRemote.NATIVE_ITEM_EXPLORE.isOn && (
-                  <NativeItemExplore adId={ID_ADS_ITEM} isAdsSmall={true}/>
-                )}
               </View>
             ))}
           </ScrollView>
         )}
       </ScrollView>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

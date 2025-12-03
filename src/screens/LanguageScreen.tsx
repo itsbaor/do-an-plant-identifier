@@ -26,14 +26,10 @@ import {t_Lang, t_LangObject} from '~/@types/language';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {langList} from '~/data/languageData';
 import LanguageSelectComponent from '~/components/languages/LanguageSelectComponent';
-import NativeImage from '~/components/ads/NativeImage';
-import Config from 'react-native-config';
 import IconBack from '~/resources/icons/IconBack';
 import IconCheck from '~/resources/icons/IconCheck';
-import NativeBanner from '~/components/ads/NativeBanner';
 import i18n from '~/i18n';
 import {TIME_DELAY} from '~/App';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {DotIndicator} from 'react-native-indicators';
 
 export const KEY_LANG = '@key_lang';
@@ -56,16 +52,8 @@ const LanguageScreen = () => {
     useNavigation<StackNavigationProp<RootParamList, 'LanguageScreen'>>();
   const [langSelected, setLangSelected] = useState<t_Lang>('');
   const [isFirstTime, setIsFirstTime] = useState<boolean>(true);
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_LANGUAGE.isOn,
-  );
   const theme = useAppTheme();
   const scrollViewRef = useRef<ScrollView>(null);
-  const ID_NATIVE_LANGUAGE = useMemo(
-    () => (__DEV__ ? undefined : adsRemote.NATIVE_LANGUAGE.id),
-    [adsRemote],
-  );
   const langTrans = [
     t('English'),
     t('Hindi'),
@@ -133,8 +121,6 @@ const LanguageScreen = () => {
         }}>
         {!isFirstTime && (
           <TouchableOpacity
-            disabled={waitingAds}
-            style={{opacity: waitingAds ? 0.5 : 1}}
             onPress={handleGoBack}>
             <IconBack />
           </TouchableOpacity>
@@ -150,16 +136,11 @@ const LanguageScreen = () => {
           </Text>
         </View>
         <View style={{width: 40, aspectRatio: 1, justifyContent: 'center'}}>
-          {langSelected &&
-            (waitingAds ? (
-              <View>
-                <DotIndicator color={theme.colors.primary} size={5} count={3} />
-              </View>
-            ) : (
-              <TouchableOpacity style={{}} onPress={handleConfirmLanguage}>
-                <IconCheck />
-              </TouchableOpacity>
-            ))}
+          {langSelected && (
+            <TouchableOpacity style={{}} onPress={handleConfirmLanguage}>
+              <IconCheck />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -178,14 +159,6 @@ const LanguageScreen = () => {
           </View>
         </ScrollView>
       </View>
-
-      {/* Ads Native Image */}
-      {adsRemote.NATIVE_LANGUAGE.isOn &&
-        (isFirstTime ? (
-          <NativeBanner adId={ID_NATIVE_LANGUAGE} setWaitAds={setWaitingAds} />
-        ) : (
-          <NativeImage adId={ID_NATIVE_LANGUAGE} setWaitAds={setWaitingAds} />
-        ))}
     </SafeAreaView>
   );
 };

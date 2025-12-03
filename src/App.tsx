@@ -18,7 +18,6 @@ import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {Colors, Header} from 'react-native/Libraries/NewAppScreen';
 import TestScreen from './screens/TestScreen';
-import AppOpenAdsProvider from './contexts/AppOpenAdsProvider';
 import InternetCheckerProvider from './contexts/InternetCheckerProvider';
 import {theme} from './resources/theme';
 import NavigationProvider from './navigations/NavigationProvider';
@@ -93,7 +92,6 @@ function App(): React.JSX.Element {
                   <BottomSheetModalProvider>
                     {connectInternet ? (
                       <>
-                        <AppOpenAdsProvider />
                         {devTest ? <TestScreen /> : <RootNavigation />}
                       </>
                     ) : (

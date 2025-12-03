@@ -9,17 +9,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-
-const ID_ADS = __DEV__
-  ? undefined
-  : Platform.OS === 'android'
-  ? Config.ANDROID_NATIVE_SEARCH
-  : Config.IOS_NATIVE_SEARCH;
 
 const TemplateScreen = () => {
   const {t} = useTranslation();
@@ -27,11 +19,7 @@ const TemplateScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const route = useRoute<RouteProp<RootParamList>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
   const theme = useAppTheme();
   return (
     <SafeAreaView
@@ -39,12 +27,8 @@ const TemplateScreen = () => {
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
         title={t('Title')}
-        waitingAds={waitingAds}
       />
       <View style={{flex: 1, backgroundColor: 'red'}}></View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

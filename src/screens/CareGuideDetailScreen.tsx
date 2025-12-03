@@ -19,22 +19,15 @@ import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
 import {t_CareGuideDetail} from '~/@types/plant';
-import Config from 'react-native-config';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import IconBack from '~/resources/icons/IconBack';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import IconWaterDetail from '~/resources/icons/plantDetail/IconWaterDetail';
 import IconSunlightDetail from '~/resources/icons/plantDetail/IconSunlightDetail';
 import IconPruning from '~/resources/icons/plantDetail/IconPruning';
-import {TestIds, useInterstitialAd} from 'react-native-google-mobile-ads';
-import {incrementInterCount, stateInterCount} from '~/redux/slices/interCount';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 
 const CareGuideDetailScreen = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const navigation =
     useNavigation<
@@ -43,26 +36,11 @@ const CareGuideDetailScreen = () => {
   const route = useRoute<RouteProp<RootParamList, 'CareGuideDetailScreen'>>();
   const careGuideDetail = route.params;
   const {openModal, closeModals} = useModal();
-  const g_inter = useAppSelector(stateInterCount);
   const theme = useAppTheme();
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
-  const ID_ADS_INTER = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_PROBLEM.id;
-  const interAds = useInterstitialAd(ID_ADS_INTER);
 
   const handleGoBack = () => {
     navigation.goBack();
-    interAds.isLoaded && dispatch(setStateAdsOpen(false)) && interAds.show();
-    dispatch(incrementInterCount());
   };
-
-  useEffect(() => {
-    adsRemote.INTER_PROBLEM.isOn && (g_inter + 1) % 3 == 0 && interAds.load();
-  }, [interAds.load]);
 
   return (
     <SafeAreaView
@@ -78,9 +56,7 @@ const CareGuideDetailScreen = () => {
           },
         ]}>
         <TouchableOpacity
-          onPress={handleGoBack}
-          disabled={waitingAds}
-          style={waitingAds && {opacity: 0.5}}>
+          onPress={handleGoBack}>
           <IconBack />
         </TouchableOpacity>
         <Text style={[styles.header, {color: theme.colors.primary_dark}]}>
@@ -194,9 +170,6 @@ const CareGuideDetailScreen = () => {
           </View>
         </ScrollView>
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

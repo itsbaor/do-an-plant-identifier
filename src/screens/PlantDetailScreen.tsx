@@ -19,9 +19,6 @@ import {RootParamList} from '~/navigations/RootNavigation';
 import IconBack from '~/resources/icons/IconBack';
 import {t_CareGuideDetail, t_PlantDetail, t_PlantType} from '~/@types/plant';
 import {getPromtDetailCareGuide} from '~/resources/prompts';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-import Config from 'react-native-config';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import IconFamily from '~/resources/icons/plantDetail/IconFamily';
 import IconOrigin from '~/resources/icons/plantDetail/IconOrigin';
@@ -44,7 +41,6 @@ import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue, incrementMapValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import {GoogleGenerativeAI} from '@google/generative-ai';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import {stateLang} from '~/redux/slices/langSlices';
 import {t_Lang} from '~/@types/language';
 
@@ -86,7 +82,6 @@ const PlantDetailScreen = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const {openInAppReview} = useInAppReview();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const g_lang = useAppSelector(stateLang);
   const isPre = useAppSelector(statePremium);
   const {openModal, closeModals} = useModal();
@@ -97,10 +92,6 @@ const PlantDetailScreen = () => {
   const plantDetail = route.params;
   const theme = useAppTheme();
   const g_aiKey = useAppSelector(stateKeyAi);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
 
   const handleGoToCareGuide = async () => {
     openModal('LoadingModal', {
@@ -136,9 +127,7 @@ const PlantDetailScreen = () => {
     };
     handleAddPlantToGarden(plantType);
     dispatch(actionAddPlant(plantType));
-    dispatch(setStateAdsOpen(false));
     openInAppReview();
-    dispatch(setStateAdsOpen(true));
   };
 
   useEffect(() => {
@@ -175,9 +164,7 @@ const PlantDetailScreen = () => {
           },
         ]}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          disabled={waitingAds}
-          style={[waitingAds && {opacity: 0.5}]}>
+          onPress={() => navigation.goBack()}>
           <IconBack />
         </TouchableOpacity>
         <Text style={[styles.header, {color: theme.colors.primary_dark}]}>
@@ -277,9 +264,7 @@ const PlantDetailScreen = () => {
                   borderWidth: 1,
                   borderColor: theme.colors.primary_dark,
                 },
-                waitingAds && {opacity: 0.5},
               ]}
-              disabled={waitingAds}
               onPress={handleGoToCareGuide}>
               <Text
                 style={[styles.textBtn, {color: theme.colors.primary_dark}]}>
@@ -547,9 +532,6 @@ const PlantDetailScreen = () => {
           </View>
         </ScrollView>
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

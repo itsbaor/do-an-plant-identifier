@@ -26,7 +26,6 @@ import IconWarning from '~/resources/icons/IconWarning';
 import IconSun from '~/resources/icons/IconSun';
 import {SensorName, useSensors} from '@serserm/react-native-turbo-sensors';
 import {useCameraPermissions} from '~/hooks/useCamera';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import {useAppDispatch} from '~/hooks/useReduxStore';
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
 
@@ -69,7 +68,6 @@ const LightMeterScreen = () => {
 
   useEffect(() => {
     if (!hasCamPermission) {
-      dispatch(setStateAdsOpen(false));
       refreshCamPermissions();
     }
   }, [refreshCamPermissions]);

@@ -17,11 +17,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import {statePlantStorage} from '~/redux/slices/plantStorageSlice';
 import PlantItem from '~/components/search/PlantItem';
 import {
@@ -37,14 +35,9 @@ const SelectTaskScreen = () => {
     useNavigation<StackNavigationProp<RootParamList, 'SelectTaskScreen'>>();
   const route = useRoute<RouteProp<RootParamList>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const g_plantStorage = useAppSelector(statePlantStorage);
   const g_reminder = useAppSelector(stateReminder);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_REMINDER.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_REMINDER.id;
 
   const theme = useAppTheme();
 
@@ -59,7 +52,6 @@ const SelectTaskScreen = () => {
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
         title={t('Select a task')}
-        waitingAds={waitingAds}
       />
       <View style={{flex: 1, paddingHorizontal: 20, gap: 15}}>
         <Text style={{fontSize: 18, color: theme.colors.text_black}}>
@@ -70,7 +62,6 @@ const SelectTaskScreen = () => {
             onPress={() => {
               handleChooseTask(e_Task.WATERING);
             }}
-            disabled={waitingAds}
             style={{
               width: '100%',
               borderRadius: 5,
@@ -87,7 +78,6 @@ const SelectTaskScreen = () => {
               paddingVertical: 15,
               gap: 5,
               position: 'relative',
-              opacity: waitingAds ? 0.5 : 1,
             }}>
             <View
               style={{
@@ -133,7 +123,6 @@ const SelectTaskScreen = () => {
             onPress={() => {
               handleChooseTask(e_Task.FERTILIZING);
             }}
-            disabled={waitingAds}
             style={{
               width: '100%',
               borderRadius: 5,
@@ -150,7 +139,6 @@ const SelectTaskScreen = () => {
               paddingVertical: 15,
               gap: 5,
               position: 'relative',
-              opacity: waitingAds ? 0.5 : 1,
             }}>
             <View
               style={{
@@ -194,9 +182,6 @@ const SelectTaskScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-      {adsRemote.NATIVE_REMINDER.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

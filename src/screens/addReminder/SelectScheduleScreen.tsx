@@ -9,11 +9,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import {
   e_Repeat,
   setStateReminder,
@@ -26,13 +24,8 @@ const SelectScheduleScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const route = useRoute<RouteProp<RootParamList>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const g_reminder = useAppSelector(stateReminder);
   const isPre = useAppSelector(statePremium);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_REMINDER.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_REMINDER.id;
 
   const theme = useAppTheme();
 
@@ -47,7 +40,6 @@ const SelectScheduleScreen = () => {
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
         title={t('Select a repeater')}
-        waitingAds={waitingAds}
       />
       <View style={{flex: 1, paddingHorizontal: 20, gap: 15}}>
         <Text style={{fontSize: 18, color: theme.colors.text_black}}>
@@ -58,7 +50,6 @@ const SelectScheduleScreen = () => {
             onPress={() => {
               handleChooseRepeater(e_Repeat.DAILY);
             }}
-            disabled={waitingAds}
             style={{
               width: '100%',
               borderRadius: 5,
@@ -74,7 +65,6 @@ const SelectScheduleScreen = () => {
               alignItems: 'center',
               paddingVertical: 15,
               position: 'relative',
-              opacity: waitingAds ? 0.5 : 1,
             }}>
             <Text
               style={{
@@ -92,7 +82,6 @@ const SelectScheduleScreen = () => {
             onPress={() => {
               handleChooseRepeater(e_Repeat.WEEKLY);
             }}
-            disabled={waitingAds}
             style={{
               width: '100%',
               borderRadius: 5,
@@ -108,7 +97,6 @@ const SelectScheduleScreen = () => {
               alignItems: 'center',
               paddingVertical: 15,
               position: 'relative',
-              opacity: waitingAds ? 0.5 : 1,
             }}>
             <Text
               style={{
@@ -126,7 +114,6 @@ const SelectScheduleScreen = () => {
             onPress={() => {
               handleChooseRepeater(e_Repeat.MONTHLY);
             }}
-            disabled={waitingAds}
             style={{
               width: '100%',
               borderRadius: 5,
@@ -142,7 +129,6 @@ const SelectScheduleScreen = () => {
               alignItems: 'center',
               paddingVertical: 15,
               position: 'relative',
-              opacity: waitingAds ? 0.5 : 1,
             }}>
             <Text
               style={{
@@ -158,9 +144,6 @@ const SelectScheduleScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-      {adsRemote.NATIVE_REMINDER.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

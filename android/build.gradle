@@ -20,17 +20,4 @@ buildscript {
     }
 }
 
-//Fix add ads sdk
-allprojects {
-    repositories {
-        maven {
-            url 'https://android-sdk.is.com/'
-        }
-        maven {
-            url 'https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea'
-        }
-        maven { url 'https://www.jitpack.io' }
-    }
-}
-
 apply plugin: "com.facebook.react.rootproject"

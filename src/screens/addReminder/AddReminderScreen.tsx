@@ -14,11 +14,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import FlexDropdown from '~/components/FlexDropdown';
 import {
   actionResetReminder,
@@ -38,8 +36,6 @@ import notifee, {
   RepeatFrequency,
 } from '@notifee/react-native';
 import {PermissionsAndroid} from 'react-native';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
-import {TestIds, useRewardedAd} from 'react-native-google-mobile-ads';
 
 async function requestNotificationPermission() {
   let isAllowed = false;
@@ -113,18 +109,9 @@ const AddReminderScreen = () => {
   const route = useRoute<RouteProp<RootParamList>>();
   const {openModal, closeModals} = useModal();
   const g_reminder = useAppSelector(stateReminder);
-  const adsRemote = useAppSelector(stateAdsRemote);
   const [isNoti, setIsNoti] = useState(false);
   const isPre = useAppSelector(statePremium);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_REMINDER.isOn,
-  );
-  const ID_ADS_REWARD = __DEV__
-    ? TestIds.REWARDED
-    : adsRemote.REWARD_REMINDER.id;
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_REMINDER.id;
-  const rewardAds = useRewardedAd(ID_ADS_REWARD);
   const theme = useAppTheme();
 
   const formatTime = ({
@@ -164,10 +151,6 @@ const AddReminderScreen = () => {
             alertType: 'success',
           },
         });
-        rewardAds.isLoaded &&
-          !isPre &&
-          dispatch(setStateAdsOpen(false)) &&
-          rewardAds.show();
         isNoti && scheduleNotification(reminderObj);
         dispatch(actionAddReminderToStorage(reminderObj));
         navigation.goBack();
@@ -195,10 +178,6 @@ const AddReminderScreen = () => {
     }
   };
 
-  useEffect(() => {
-    !isPre && adsRemote.REWARD_REMINDER.isOn && rewardAds.load();
-  }, [rewardAds.load]);
-
   //Refresh global state in reminder
   useEffect(() => {
     dispatch(actionResetReminder());
@@ -207,10 +186,8 @@ const AddReminderScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const getPermission = async () => {
-        dispatch(setStateAdsOpen(false));
         const isPermit = await requestNotificationPermission();
         setIsNoti(isPermit);
-        dispatch(setStateAdsOpen(true));
       };
       getPermission();
       return () => {};
@@ -243,26 +220,22 @@ const AddReminderScreen = () => {
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
         title={t('Add Reminder')}
-        waitingAds={waitingAds}
       />
       <View style={{flex: 1, gap: 15, paddingHorizontal: 20}}>
         <FlexDropdown
           title={t('Plant')}
           value={t(g_reminder.plantName || 'Select a plant')}
           onPress={() => navigation.navigate('SelectPlantScreen')}
-          isDisableDropdown={waitingAds}
         />
         <FlexDropdown
           title={t('Remind me about')}
           value={t(g_reminder.task || 'Select a task')}
           onPress={() => navigation.navigate('SelectTaskScreen')}
-          isDisableDropdown={waitingAds}
         />
         <FlexDropdown
           title={t('Repeat')}
           value={t(g_reminder.repeat || 'Select a repeat')}
           onPress={() => navigation.navigate('SelectScheduleScreen')}
-          isDisableDropdown={waitingAds}
         />
         <FlexDropdown
           title={t('Time')}
@@ -300,9 +273,6 @@ const AddReminderScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
-      {adsRemote.NATIVE_REMINDER.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

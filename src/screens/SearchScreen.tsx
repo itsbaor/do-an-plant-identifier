@@ -17,10 +17,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import Config from 'react-native-config';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import IconBack from '~/resources/icons/IconBack';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import SearchBar from '~/components/SearchBar';
 import {categoryData, e_CategoryLabel} from '~/data/categoryData';
 import {plantData} from '~/data/plantData';
@@ -49,7 +47,6 @@ import {actionAddPlant} from '~/redux/slices/plantStorageSlice';
 import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import NativeItemSearch from '~/components/ads/NativeItemSearch';
 import {stateLang} from '~/redux/slices/langSlices';
 
 export const handleAddPlantToGarden = async (plant: t_PlantType) => {
@@ -78,7 +75,6 @@ export const handleAddPlantToGarden = async (plant: t_PlantType) => {
 const SearchScreen = () => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const g_Category = useAppSelector(stateCategory);
   const g_aiKey = useAppSelector(stateKeyAi);
   const g_lang = useAppSelector(stateLang);
@@ -90,11 +86,7 @@ const SearchScreen = () => {
   const [searchText, setSearchText] = useState<string | undefined>(
     route.params.searchValue,
   );
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
   const theme = useAppTheme();
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
 
   const handleGoToDetail = async (plant: t_PlantType) => {
     openModal('LoadingModal', {
@@ -233,7 +225,6 @@ const SearchScreen = () => {
       style={[styles.container, {backgroundColor: theme.colors.bg_main}]}>
       <HeaderWithBack
         title={t('Search')}
-        waitingAds={waitingAds}
         handleGoBack={() => navigation.goBack()}
       />
       <View
@@ -371,21 +362,10 @@ const SearchScreen = () => {
                       </TouchableOpacity>
                     </View>
                   ))}
-                {adsRemote.NATIVE_SEARCH.isOn && (
-                  <View
-                    style={[
-                      styles.categoryItemContainer,
-                      styles.categoryItemContainerRight,
-                    ]}>
-                    <NativeItemSearch adId={ID_ADS} />
-                  </View>
-                )}
                 <View
                   style={[
                     styles.categoryItemContainer,
-                    adsRemote.NATIVE_SEARCH.isOn
-                      ? styles.categoryItemContainerLeft
-                      : styles.categoryItemContainerRight,
+                    styles.categoryItemContainerRight,
                   ]}>
                   <TouchableOpacity
                     style={[styles.categoryItem, {}]}
@@ -422,9 +402,6 @@ const SearchScreen = () => {
           )}
         </View>
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

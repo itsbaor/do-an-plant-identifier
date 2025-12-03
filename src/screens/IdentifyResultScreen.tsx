@@ -17,7 +17,6 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import useInAppReview from '~/hooks/useInAppReview';
@@ -30,7 +29,6 @@ import {actionAddPlant} from '~/redux/slices/plantStorageSlice';
 import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import {stateLang} from '~/redux/slices/langSlices';
 
 export type t_PlantFromScan = {
@@ -57,7 +55,6 @@ const IdentifyResultScreen = () => {
   const imageScanned = route.params.scannedImage;
   const dataLists: t_PlantFromScan[] = route.params.resultList;
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const theme = useAppTheme();
   const {openInAppReview} = useInAppReview();
@@ -76,9 +73,7 @@ const IdentifyResultScreen = () => {
     };
     handleAddPlantToGarden(plantType);
     dispatch(actionAddPlant(plantType));
-    dispatch(setStateAdsOpen(false));
     openInAppReview();
-    dispatch(setStateAdsOpen(true));
   };
 
   const navigateDetailPlant = async (plant: t_PlantType) => {

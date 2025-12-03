@@ -18,13 +18,11 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import useInAppReview from '~/hooks/useInAppReview';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import IconClose from '~/resources/icons/IconClose';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 
 const ID_ADS = __DEV__
   ? undefined
@@ -43,14 +41,11 @@ const DiagnoseResultScreen = () => {
   const dataLists = route.params.resultList;
   // const dataLists: any[] = [];
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const theme = useAppTheme();
 
   useEffect(() => {
-    dispatch(setStateAdsOpen(false));
     openInAppReview();
-    dispatch(setStateAdsOpen(true));
   }, []);
 
   return (

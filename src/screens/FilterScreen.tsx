@@ -13,11 +13,8 @@ import {useAppTheme} from '~/resources/theme';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
-import Config from 'react-native-config';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import {
   setStateCategory,
   setUpdateCategoryChecklist,
@@ -51,7 +48,6 @@ const FilterScreen = () => {
   const [choosenDropdownIndex, setChoosenDropdownIndex] = useState<number>(
     DROPDOWN.NONE,
   );
-  const adsRemote = useAppSelector(stateAdsRemote);
   const g_Category = useAppSelector(stateCategory);
   const [checkboxCategory, setCheckboxCategory] = useState<
     t_CategoryChecklist[]
@@ -60,11 +56,7 @@ const FilterScreen = () => {
   const [cycle, setCycle] = useState<CYCLE>(g_Category.cycle);
   const [growth, setGrowth] = useState<GROWTH>(g_Category.growth);
   const [watering, setWatering] = useState<WATERING>(g_Category.watering);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
   const theme = useAppTheme();
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
   const trans = [
     t('Perennial'),
     t('Average'),
@@ -128,7 +120,7 @@ const FilterScreen = () => {
       style={[styles.container, {backgroundColor: theme.colors.bg_main}]}>
       <HeaderWithBack
         title={t('Filter')}
-        waitingAds={waitingAds}
+        waitingAds={false}
         handleGoBack={() => navigation.goBack()}
       />
       <View style={{flex: 1, marginBottom: 20, paddingHorizontal: 20}}>
@@ -243,7 +235,6 @@ const FilterScreen = () => {
 
           {/* Confirm button */}
           <TouchableOpacity
-            disabled={waitingAds}
             style={{
               borderRadius: 5,
               backgroundColor: theme.colors.primary,
@@ -252,7 +243,6 @@ const FilterScreen = () => {
               alignSelf: 'center',
               marginTop: 30,
               marginBottom: 20,
-              opacity: waitingAds ? 0.5 : 1,
             }}
             onPress={handleUpdateFilterChange}>
             <Text
@@ -267,9 +257,6 @@ const FilterScreen = () => {
           </TouchableOpacity>
         </ScrollView>
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

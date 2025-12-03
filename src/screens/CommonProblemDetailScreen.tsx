@@ -18,12 +18,6 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import IconBack from '~/resources/icons/IconBack';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-import Config from 'react-native-config';
-import {incrementInterCount, stateInterCount} from '~/redux/slices/interCount';
-import {useInterstitialAd, TestIds} from 'react-native-google-mobile-ads';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 
 const CommonProblemDetailScreen = () => {
   const {t} = useTranslation();
@@ -36,27 +30,11 @@ const CommonProblemDetailScreen = () => {
     useRoute<RouteProp<RootParamList, 'CommonProblemDetailScreen'>>();
   const problemDetail = route.params;
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const g_inter = useAppSelector(stateInterCount);
   const theme = useAppTheme();
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_COMMON_PROBLEMS.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_COMMON_PROBLEMS.id;
-  const ID_ADS_INTER = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_PROBLEM.id;
-  const interAds = useInterstitialAd(ID_ADS_INTER);
 
   const handleGoBack = () => {
     navigation.goBack();
-    interAds.isLoaded && dispatch(setStateAdsOpen(false)) && interAds.show();
-    dispatch(incrementInterCount());
   };
-
-  useEffect(() => {
-    adsRemote.INTER_PROBLEM.isOn && (g_inter + 1) % 3 == 0 && interAds.load();
-  }, [interAds.load]);
 
   return (
     <SafeAreaView
@@ -72,9 +50,7 @@ const CommonProblemDetailScreen = () => {
           },
         ]}>
         <TouchableOpacity
-          onPress={handleGoBack}
-          disabled={waitingAds}
-          style={waitingAds && {opacity: 0.5}}>
+          onPress={handleGoBack}>
           <IconBack />
         </TouchableOpacity>
         <Text style={[styles.header, {color: theme.colors.primary_dark}]}>
@@ -174,9 +150,6 @@ const CommonProblemDetailScreen = () => {
           </View>
         </ScrollView>
       </View>
-      {adsRemote.NATIVE_COMMON_PROBLEMS.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

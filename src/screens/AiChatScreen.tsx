@@ -19,13 +19,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
-import Config from 'react-native-config';
 import IconBack from '~/resources/icons/IconBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import {AI_MODEL, docGenAi} from './bottom-tabs/home/HomeScreen';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import {t_Chat, CHAT} from '~/@types/chat';
 import {setStateChat, stateChat} from '~/redux/slices/chatDataSlice';
 import {setStateStartChat, stateStartChat} from '~/redux/slices/startChatSlice';
@@ -33,19 +29,11 @@ import TypewriterText from '~/components/TypeWriterText';
 import {DotIndicator} from 'react-native-indicators';
 import IconSendMessage from '~/resources/icons/IconSendMessage';
 import firestore from '@react-native-firebase/firestore';
-import {
-  useRewardedAd,
-  TestIds as testIdReward,
-} from 'react-native-google-mobile-ads';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getPromtAi} from '~/resources/prompts';
 import {findSmallestKeyValue, incrementMapValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import {GoogleGenerativeAI} from '@google/generative-ai';
-import {
-  incrementRewardCount,
-  stateRewardCount,
-} from '~/redux/slices/rewardCountSlice';
 import {ERROR_NOTI_TIME} from './bottom-tabs/ScanScreen';
 import {t_Lang} from '~/@types/language';
 import {stateLang} from '~/redux/slices/langSlices';
@@ -62,16 +50,12 @@ const AiChatScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootParamList>>();
   const route = useRoute<RouteProp<RootParamList>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const g_aiKey = useAppSelector(stateKeyAi);
   const g_lang = useAppSelector(stateLang);
   const isStartChat = useAppSelector(stateStartChat);
-  const g_rewardCount = useAppSelector(stateRewardCount);
   const chatData = useAppSelector(stateChat);
   const [isAskedAi, setIsAskedAi] = useState<boolean>(false);
-  const [isFirstAskedAi, setIsFirstAskedAi] = useState<boolean>(false);
-  const [question, setQuestion] = useState<string>('');
   const [trialChatTime, setTrialChatTime] =
     useState<number>(MAX_TRIAL_CHAT_TIME);
   const [isAiAnswering, setIsAiAnswering] = useState<boolean>(false);
@@ -81,19 +65,6 @@ const AiChatScreen = () => {
   const trans = t(
     `I'm here to help your plants grow and stay healthy! Struggling with a sick plant? I can diagnose the issue and give you the perfect treatment. No more guesswork - I'll be by your side to revive even the most neglected houseplants.`,
   );
-  const ID_ADS_BANNER = __DEV__
-    ? undefined
-    : adsRemote.NATIVE_AI_PLANT_EXPERT.id;
-
-  const ID_ADS_REWARD = adsRemote.REWARD_AI_PLANT_EXPERT.id;
-  const ID_ADS_REWARD_BACK = __DEV__
-    ? testIdReward.REWARDED
-    : adsRemote.REWARD_AI_PLANT_EXPERT.id;
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_AI_PLANT_EXPERT.isOn,
-  );
-  const {isLoaded, isClosed, load, show, error} = useRewardedAd(ID_ADS_REWARD);
-  const rewardsBack = useRewardedAd(ID_ADS_REWARD_BACK);
 
   const handleScrollEnd = () => {
     setTimeout(() => {
@@ -178,8 +149,6 @@ const AiChatScreen = () => {
     scrollViewRef.current?.scrollToEnd({animated: true});
     setIsAiAnswering(true);
     if (!isPre) {
-      setIsFirstAskedAi(true);
-      setQuestion(question);
       //Check trial
       if (trialChatTime == 0) {
         setIsAiAnswering(false);
@@ -197,16 +166,7 @@ const AiChatScreen = () => {
         });
         return;
       } else {
-        //load reward ads
-        if (adsRemote.REWARD_AI_PLANT_EXPERT.isOn) {
-          load();
-        }
-        //Load ads back
-        if (g_rewardCount % 2 == 1 && adsRemote.REWARD_AI_BACK.isOn) {
-          rewardsBack.load();
-        }
-        !adsRemote.REWARD_AI_PLANT_EXPERT.isOn &&
-          handleResolveAiAnswer(question, g_lang);
+        handleResolveAiAnswer(question, g_lang);
       }
     } else {
       //Resolve for premium
@@ -216,13 +176,6 @@ const AiChatScreen = () => {
 
   const handleGoBack = () => {
     navigation.goBack();
-    console.log('Count: ', g_rewardCount);
-    adsRemote.REWARD_AI_BACK.isOn &&
-      rewardsBack.isLoaded &&
-      g_rewardCount % 2 == 1 &&
-      dispatch(setStateAdsOpen(false)) &&
-      rewardsBack.show();
-    isFirstAskedAi && dispatch(incrementRewardCount()); //Tang khi chat dc kich hoat
   };
 
   useEffect(() => {
@@ -234,21 +187,7 @@ const AiChatScreen = () => {
 
   useEffect(() => {
     getTrialChatTime();
-  }, [rewardsBack.load]);
-
-  useEffect(() => {
-    setIsAiAnswering(false);
-    if (isLoaded) {
-      dispatch(setStateAdsOpen(false));
-      show();
-    }
-  }, [isLoaded]);
-
-  useEffect(() => {
-    if (isClosed || error) {
-      handleResolveAiAnswer(question, g_lang);
-    }
-  }, [isClosed, error]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -284,9 +223,7 @@ const AiChatScreen = () => {
           },
         ]}>
         <TouchableOpacity
-          onPress={handleGoBack}
-          disabled={waitingAds}
-          style={[waitingAds && {opacity: 0.5}]}>
+          onPress={handleGoBack}>
           <IconBack />
         </TouchableOpacity>
         <Text style={[styles.header, {color: theme.colors.primary_dark}]}>
@@ -552,9 +489,6 @@ const AiChatScreen = () => {
           </View>
         )}
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS_BANNER} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

@@ -27,8 +27,6 @@ import PurchaseSelectComponent, {
 import {RootParamList} from '~/navigations/RootNavigation';
 import IconClose from '~/resources/icons/IconClose';
 import {useAppDispatch} from '~/hooks/useReduxStore';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
-import {setResetStateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {setStatePremium} from '~/redux/slices/premiumSlice';
 
 const PremiumDetailScreen = () => {
@@ -63,7 +61,6 @@ const PremiumDetailScreen = () => {
           {
             text: t('Buy') as string | undefined,
             onPress: async () => {
-              dispatch(setStateAdsOpen(false));
               try {
                 const subscriptionOptions: RequestSubscription = {
                   subscriptionOffers: [
@@ -85,7 +82,6 @@ const PremiumDetailScreen = () => {
       purchaseUpdatedListener(purchase => {
         // Handle successful purchase here
         console.log('Purchase Success----:', purchase);
-        dispatch(setResetStateAdsRemote());
         dispatch(setStatePremium(true));
       })) as EmitterSubscription;
 

@@ -31,7 +31,6 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import {
@@ -41,7 +40,6 @@ import {
 } from 'react-native-vision-camera';
 import {useCameraPermissions} from '~/hooks/useCamera';
 import {Asset, launchImageLibrary} from 'react-native-image-picker';
-import {setStateAdsOpen, stateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import IconLightning from '~/resources/icons/scan/IconLightning';
 import IconClose from '~/resources/icons/IconClose';
 import IconGallery from '~/resources/icons/scan/IconGallery';
@@ -65,7 +63,6 @@ import {
 } from '../SplashScreen';
 import {setStateKeyScan, stateKeyScan} from '~/redux/slices/keyScanSlice';
 import {AI_MODEL, docGenAi, docGenImage} from './home/HomeScreen';
-import {TestIds, useInterstitialAd} from 'react-native-google-mobile-ads';
 import {uploadApiWithApiKey} from '~/utils/axios';
 import RNFS from 'react-native-fs';
 import IconNoCamera from '~/resources/icons/scan/IconNoCamera';
@@ -84,6 +81,8 @@ import {
   saveDataToStoSuccess,
   showNotification,
 } from '~/utils';
+import * as PlantIdApi from '~/services/plantIdApi';
+import {prepareImageForUpload} from '~/services/imageOptimizer';
 import {stateLang} from '~/redux/slices/langSlices';
 import {ERROR_MSG} from '~/data/errorCode';
 import {t_PlantFromScan} from '../IdentifyResultScreen';
@@ -124,6 +123,8 @@ type t_TorchMode = 'on' | 'off' | undefined;
 
 const TIME_OUT_DURATION = 12000;
 
+// Note: This function is deprecated in favor of imageOptimizer.prepareImageForUpload
+// Kept for backward compatibility with old code
 export const convertImageToBase64 = async (path: string) => {
   const base64Data = await RNFS.readFile(path, 'base64');
   return base64Data;
@@ -162,7 +163,6 @@ const ScanScreen = () => {
     useNavigation<StackNavigationProp<RootParamList, 'ScanScreen'>>();
   const route = useRoute<RouteProp<RootParamList, 'ScanScreen'>>();
   const {openModal, closeModals} = useModal();
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const keyScan = useAppSelector(stateKeyScan);
   const g_searchImageKey = useAppSelector(stateKeySearch);
@@ -183,20 +183,6 @@ const ScanScreen = () => {
   const textFunction = useMemo(() => FUNCTION_TEXT[camFunc], [camFunc]);
   const {hasCamPermission, updateCamPermissions, refreshCamPermissions} =
     useCameraPermissions();
-
-  const ID_SCAN = __DEV__ ? TestIds.INTERSTITIAL : adsRemote.INTER_SCAN.id;
-
-  const ID_IDENTIFY = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_IDENTIFY.id;
-
-  const ID_DIAGNOSE = __DEV__
-    ? TestIds.INTERSTITIAL
-    : adsRemote.INTER_DIAGNOSE.id;
-
-  const interIdentify = useInterstitialAd(ID_IDENTIFY);
-  const interDiagnose = useInterstitialAd(ID_DIAGNOSE);
-  const interScan = useInterstitialAd(ID_SCAN);
 
   const getCurrentDateString = () => {
     const today = new Date();
@@ -254,7 +240,6 @@ const ScanScreen = () => {
 
   const getImageFromLibrary = async () => {
     try {
-      dispatch(setStateAdsOpen(false));
       const result = await launchImageLibrary({
         mediaType: 'photo',
         quality: 0.9,
@@ -275,65 +260,67 @@ const ScanScreen = () => {
         return;
       }
     } catch (error) {
-      dispatch(setStateAdsOpen(true));
       console.error('Dev define Error in get image from gallery:---\n', error);
     }
   };
 
   const identifyPlantPremium = async (prompt: string, imageUri: string) => {
     const idenKeyNow = keyScan;
-    const base64Image = await convertImageToBase64(imageUri);
+
     openModal('LoadingModal', {
       message: t('Identifying...'),
     });
-    let timeoutId = setTimeout(() => {
-      Notifier.showNotification({
-        title: 'Oopss!',
-        description: t('Request time out! Please try again later!'),
-        Component: NotifierComponents.Alert,
-        componentProps: {
-          alertType: 'error',
-        },
-      });
-      closeModals('LoadingModal');
-    }, TIME_OUT_DURATION);
+
     try {
-      //Get response from plantId API
-      const formData = new FormData();
-      formData.append('images', [base64Image]);
-      formData.append('similar_images', true);
-      const response = await uploadApiWithApiKey(
-        API_IDENTIFY,
-        formData,
-        idenKeyNow,
-      );
-      //Justify response from Identify API, only take max 3 results
-      const plantIdIdentResults: any[] =
-        response.result.classification.suggestions.length > 3
-          ? response.result.classification.suggestions.slice(0, 3)
-          : response.result.classification.suggestions;
+      // Prepare and optimize image
+      const {base64, isValid} = await prepareImageForUpload(imageUri);
+
+      if (!isValid) {
+        closeModals('LoadingModal');
+        showNotification(
+          t('Warning'),
+          t('Image size is too large. Results may be slower.'),
+          'warn',
+        );
+      }
+
+      // Call Plant.id API using the new service
+      const response = await PlantIdApi.identifyPlant(base64, idenKeyNow);
+
+      if (!response.isSuccess) {
+        closeModals('LoadingModal');
+        showNotification(
+          t('Oopss!'),
+          t(response.message),
+          'error',
+        );
+        return;
+      }
+
+      // Process results with AI for enhanced information
+      const plantIdIdentResults = response.data || [];
       const modifiedPlantIdentResults: t_PlantIdentify[] =
-        plantIdIdentResults.map((item, index) => {
-          const plantIdentScan: t_PlantIdentify = {
-            name: item.name,
-            image: item.similar_images ? item.similar_images[0].url : '',
-          };
-          return plantIdentScan;
-        });
-      //Then asked AI with promt to fill some specific information
+        plantIdIdentResults.map((item) => ({
+          name: item.name,
+          image: item.image,
+        }));
+
+      // Use AI to enhance results
       const curAiKey = g_aiKey;
       const genAi = new GoogleGenerativeAI(curAiKey);
       const model = genAi.getGenerativeModel({model: AI_MODEL});
       incrementMapValue(docGenAi, curAiKey);
+
       const result = await model.generateContent([
         prompt,
         JSON.stringify(modifiedPlantIdentResults),
       ]);
+
       const indexOfOpen = result.response.text().indexOf('[');
-      clearTimeout(timeoutId);
       closeModals('LoadingModal');
       decrementMapValue('key', idenKeyNow);
-      //Navigate to result screen
+
+      // Navigate to result screen
       navigation.navigate('IdentifyResultScreen', {
         scannedImage: imageUri,
         resultList:
@@ -347,7 +334,6 @@ const ScanScreen = () => {
       });
     } catch (error) {
       closeModals('LoadingModal');
-      clearTimeout(timeoutId);
       console.error('Dev defined error in identify:----', error);
       showNotification(
         t('Oopss!'),
@@ -358,245 +344,236 @@ const ScanScreen = () => {
   };
 
   const identifyPlant = async (prompt: string, imageUri: string) => {
-    const aiKeyNow = g_aiKey;
-    const searchImageKeyNow = g_searchImageKey;
-    //check trial identify
-    if (trialScanTime.time == 0) {
-      showNotification(
-        t('Oopss!'),
-        t(
-          'You have reached the maximum number of trial identify, please upgrade to premium!',
-        ),
-        'error',
-      );
-      navigation.push('PremiumScreen', {appStart: false});
-      return;
-    } else {
-      //Load inter ads
-      if (adsRemote.INTER_IDENTIFY.isOn) {
-        dispatch(setStateAdsOpen(false));
-        interIdentify.load();
-      }
-    }
-    const base64Image = await convertImageToBase64(imageUri); //Base64 image
+    const plantIdApiKey = Config.API_KEY_PLANTID || keyScan;
+
     openModal('LoadingModal', {
       message: t('Identifying...'),
     });
-    let timeoutId = setTimeout(() => {
-      showNotification(
-        t('Oopss!'),
-        t('Request time out! Please try again later!'),
-        'error',
-      );
-      closeModals('LoadingModal');
-    }, TIME_OUT_DURATION);
-    console.log('AI key Identify:', aiKeyNow);
-    const response = await getIdentifyResultByPromtImage(
-      aiKeyNow,
-      prompt,
-      base64Image,
-    );
-    clearTimeout(timeoutId);
-    closeModals('LoadingModal');
-    //Update scan time
-    if (response.isSuccess) {
-      incrementMapValue(docGenAi, aiKeyNow);
-      const updatedScanTime: t_DayTrial = {
-        time: trialScanTime.time - 1,
-        date: trialScanTime.date,
-      };
-      const saveSuccess = await saveDataToStoSuccess(
-        IDENTIFY_STORAGE_KEY,
-        JSON.stringify(updatedScanTime),
-      );
-      if (saveSuccess) {
-        setTrialScanTime({...updatedScanTime});
-      } else {
+
+    try {
+      // Prepare and optimize image
+      const {base64, isValid} = await prepareImageForUpload(imageUri);
+
+      if (!isValid) {
+        showNotification(
+          t('Warning'),
+          t('Image size is large. This may take longer.'),
+          'warn',
+        );
+      }
+
+      // Call Plant.id API using the new service
+      console.log('Using Plant.id API for identification');
+      const response = await PlantIdApi.identifyPlant(base64, plantIdApiKey);
+
+      if (!response.isSuccess) {
+        closeModals('LoadingModal');
         showNotification(
           t('Oopss!'),
-          t('Something went wrong, please try again later.'),
+          t(response.message || 'Something went wrong, please try again later.'),
           'error',
         );
         return;
       }
-      //Get image
-      const imgRes = await getScanImage(
-        searchImageKeyNow,
-        response.data.name,
-        'Plant_Image',
-      );
-      incrementMapValue(docGenImage, searchImageKeyNow);
-      response.data.image = imgRes.data ?? null;
-      //Navigate to result screen
+
+      // Process results - take first result
+      const plantData = response.data?.[0];
+      if (!plantData) {
+        closeModals('LoadingModal');
+        showNotification(
+          t('Oopss!'),
+          t('No plant identified. Please try a clearer image.'),
+          'error',
+        );
+        return;
+      }
+
+      // Format result for display - Map Plant.id data to expected format
+      const resultData = {
+        name: plantData.name,
+        image: plantData.image,
+        other_name: plantData.common_names?.[0] || plantData.scientific_name || plantData.name,
+        life_span: 'Perennial', // Default value - can be enhanced with AI later
+        watering: 'Average', // Default value
+        sunlight: 'Full Sun', // Default value
+        probability: plantData.probability,
+        scientific_name: plantData.scientific_name,
+        common_names: plantData.common_names,
+      };
+
+      closeModals('LoadingModal');
+      decrementMapValue('key', plantIdApiKey);
+
+      // Navigate to result screen
       navigation.navigate('IdentifyResultScreen', {
         scannedImage: imageUri,
-        resultList: [response.data],
+        resultList: [resultData],
       });
-    } else {
-      response.message === ERROR_MSG.AI_SERVER_DOWN &&
-        showNotification(t('Oopss!'), t(response.message), 'error');
-      response.message === ERROR_MSG.BAD_IMAGE &&
-        showNotification(t('Bad Image'), t(response.message), 'warn');
+    } catch (error) {
+      closeModals('LoadingModal');
+      console.error('Error in identifyPlant:', error);
+      showNotification(
+        t('Oopss!'),
+        t('Something went wrong, please try again later.'),
+        'error',
+      );
     }
   };
 
   const diagnosePlantPremium = async (imageUri: string) => {
     const diagKeyNow = keyScan;
-    //check trial diagnose
-    const base64Image = await convertImageToBase64(imageUri);
+
     openModal('LoadingModal', {
       message: t('Diagnosing...'),
     });
-    let timeoutId = setTimeout(() => {
-      Notifier.showNotification({
-        title: 'Oopss!',
-        description: t(
-          'Waiting time too long for diagnose plant! Try again later!',
-        ),
-        Component: NotifierComponents.Alert,
-        componentProps: {
-          alertType: 'error',
-        },
-      });
-      closeModals('LoadingModal');
-    }, TIME_OUT_DURATION);
+
     try {
-      //Call PlantId API to get plant disease on given plants
-      const formData = new FormData();
-      formData.append('images', [base64Image]);
-      formData.append('similar_images', true);
-      const response = await uploadApiWithApiKey(
-        API_DIAGNOSE,
-        formData,
-        diagKeyNow,
-      );
-      const plantIdDiagnoseResults: any[] =
-        response.result.disease.suggestions.length > 3
-          ? response.result.disease.suggestions.slice(0, 3)
-          : response.result.disease.suggestions;
+      // Prepare and optimize image
+      const {base64, isValid} = await prepareImageForUpload(imageUri);
+
+      if (!isValid) {
+        closeModals('LoadingModal');
+        showNotification(
+          t('Warning'),
+          t('Image size is too large. Results may be slower.'),
+          'warn',
+        );
+      }
+
+      // Call Plant.id API using the new service
+      const response = await PlantIdApi.diagnosePlant(base64, diagKeyNow);
+
+      if (!response.isSuccess) {
+        closeModals('LoadingModal');
+
+        // Handle healthy plant case
+        if (response.message === ERROR_MSG.HEALTHY_PLANT) {
+          showNotification(
+            t('Congratulations!'),
+            t('Your plant is healthy!'),
+            'success',
+          );
+          return;
+        }
+
+        showNotification(
+          t('Oopss!'),
+          t(response.message),
+          'error',
+        );
+        return;
+      }
+
+      // Process results
+      const plantIdDiagnoseResults = response.data || [];
       const modifiedPlantIdDiagnoseResults = plantIdDiagnoseResults.map(
-        (item, index) => {
-          const plantDiagnoseScan: t_PlantDiagnose = {
-            name: item.name,
-            probability: item.probability,
-            similar_images: item.similar_images,
-          };
-          return plantDiagnoseScan;
-        },
+        (item) => ({
+          name: item.name,
+          probability: item.probability,
+          similar_images: item.similar_images,
+        }),
       );
-      clearTimeout(timeoutId);
+
       closeModals('LoadingModal');
       decrementMapValue('key', diagKeyNow);
-      //Navigate to result screen
+
+      // Navigate to result screen
       navigation.navigate('DiagnoseResultScreen', {
         scannedImage: imageUri,
         resultList: modifiedPlantIdDiagnoseResults,
       });
     } catch (error) {
       closeModals('LoadingModal');
-      clearTimeout(timeoutId);
       console.error('Dev defined error in diagnose:----', error);
-      //Show inform dialog
-      Notifier.showNotification({
-        title: 'Oopss!',
-        description: t('Something went wrong, please try again later.'),
-        Component: NotifierComponents.Alert,
-        componentProps: {
-          alertType: 'error',
-        },
-      });
+      showNotification(
+        t('Oopss!'),
+        t('Something went wrong, please try again later.'),
+        'error',
+      );
     }
   };
 
   const diagnosePlant = async (imageUri: string) => {
-    const aiKeyNow = g_aiKey;
-    const searchImageKeyNow = g_searchImageKey;
-    //check trial diagnose
-    if (trialDiagnoseTime.time == 0) {
-      showNotification(
-        t('Oopss!'),
-        t(
-          'You have reached the maximum number of trial identify, please upgrade to premium!',
-        ),
-        'error',
-      );
-      navigation.push('PremiumScreen', {appStart: false});
-      return;
-    } else {
-      //Load inter ads
-      if (adsRemote.INTER_DIAGNOSE.isOn) {
-        dispatch(setStateAdsOpen(false));
-        interDiagnose.load();
-      }
-    }
-    const base64Image = await convertImageToBase64(imageUri);
+    const plantIdApiKey = Config.API_KEY_PLANTID || keyScan;
+
     openModal('LoadingModal', {
       message: t('Diagnosing...'),
     });
-    let timeoutId = setTimeout(() => {
-      showNotification(
-        t('Oopss!'),
-        t('Request time out! Please try again later!'),
-        'error',
-      );
-      closeModals('LoadingModal');
-    }, TIME_OUT_DURATION);
-    console.log('AI key Diagnose:', aiKeyNow);
-    const response = await getDiagnoseResultByImageFile(
-      aiKeyNow,
-      getPromtDiagnose(),
-      base64Image,
-    );
-    clearTimeout(timeoutId);
-    closeModals('LoadingModal');
-    //Update scan time
-    if (response.isSuccess) {
-      incrementMapValue(docGenAi, aiKeyNow);
-      const updatedDiagnoseTime: t_DayTrial = {
-        time: trialDiagnoseTime.time - 1,
-        date: trialDiagnoseTime.date,
-      };
-      const saveSuccess = await saveDataToStoSuccess(
-        DIAGNOSE_STORAGE_KEY,
-        JSON.stringify(updatedDiagnoseTime),
-      );
-      if (response.message == ERROR_MSG.HEALTHY_PLANT) {
+
+    try {
+      // Prepare and optimize image
+      const {base64, isValid} = await prepareImageForUpload(imageUri);
+
+      if (!isValid) {
         showNotification(
-          t('Congratulations!'),
-          t(ERROR_MSG.HEALTHY_PLANT),
-          'success',
+          t('Warning'),
+          t('Image size is large. This may take longer.'),
+          'warn',
         );
-        return;
       }
-      if (saveSuccess) {
-        setTrialDiagnoseTime({...updatedDiagnoseTime});
-      } else {
+
+      // Call Plant.id API using the new service
+      console.log('Using Plant.id API for diagnosis');
+      const response = await PlantIdApi.diagnosePlant(base64, plantIdApiKey);
+
+      if (!response.isSuccess) {
+        closeModals('LoadingModal');
+
+        // Handle healthy plant case
+        if (response.message === ERROR_MSG.HEALTHY_PLANT) {
+          showNotification(
+            t('Congratulations!'),
+            t('Your plant is healthy!'),
+            'success',
+          );
+          return;
+        }
+
         showNotification(
           t('Oopss!'),
-          t('Something went wrong, please try again later.'),
+          t(response.message || 'Something went wrong, please try again later.'),
           'error',
         );
         return;
       }
-      //Get image
-      const imgRes = await getScanImage(
-        searchImageKeyNow,
-        response.data.name,
-        'Disease_in_Plant',
-      );
-      incrementMapValue(docGenImage, searchImageKeyNow);
-      console.log('image', imgRes.data);
-      response.data.similar_images = imgRes.data ? [{url: imgRes.data}] : [];
-      //Navigate to result screen
+
+      // Process results - take first result
+      const diagnoseData = response.data?.[0];
+      if (!diagnoseData) {
+        closeModals('LoadingModal');
+        showNotification(
+          t('Oopss!'),
+          t('No issues detected. Your plant looks healthy!'),
+          'success',
+        );
+        return;
+      }
+
+      // Format result for display
+      const resultData = {
+        name: diagnoseData.name,
+        probability: diagnoseData.probability,
+        similar_images: diagnoseData.similar_images || [],
+        description: diagnoseData.description,
+        treatment: diagnoseData.treatment,
+      };
+
+      closeModals('LoadingModal');
+      decrementMapValue('key', plantIdApiKey);
+
+      // Navigate to result screen
       navigation.navigate('DiagnoseResultScreen', {
         scannedImage: imageUri,
-        resultList: [response.data],
+        resultList: [resultData],
       });
-    } else {
-      response.message === ERROR_MSG.AI_SERVER_DOWN &&
-        showNotification(t('Oopss!'), t(response.message), 'error');
-      response.message === ERROR_MSG.BAD_IMAGE &&
-        showNotification(t('Bad Image'), t(response.message), 'warn');
+    } catch (error) {
+      closeModals('LoadingModal');
+      console.error('Error in diagnosePlant:', error);
+      showNotification(
+        t('Oopss!'),
+        t('Something went wrong, please try again later.'),
+        'error',
+      );
     }
   };
 
@@ -629,27 +606,6 @@ const ScanScreen = () => {
     // Compare the parsed date with today's date
     return day === todayDay && month === todayMonth && year === todayYear;
   };
-
-  useEffect(() => {
-    if (adsRemote.INTER_SCAN.isOn) {
-      openModal('LoadingModal', {
-        message: t('Loading AI Modal...'),
-      });
-      interScan.load();
-    }
-  }, [interScan.load]);
-
-  useEffect(() => {
-    if (interScan.isLoaded) {
-      dispatch(setStateAdsOpen(false));
-      interScan.show();
-      closeModals('LoadingModal');
-    }
-  }, [interScan.isLoaded]);
-
-  useEffect(() => {
-    interScan.error && closeModals('LoadingModal');
-  }, [interScan.error]);
 
   useEffect(() => {
     const unsubscribe = firestore()
@@ -742,7 +698,6 @@ const ScanScreen = () => {
 
   useEffect(() => {
     if (!hasCamPermission) {
-      dispatch(setStateAdsOpen(false));
       refreshCamPermissions();
     }
   }, [refreshCamPermissions]);
@@ -913,30 +868,6 @@ const ScanScreen = () => {
                     </TouchableOpacity>
                   </View>
                 )}
-                {!isPre && (
-                  <View
-                    style={{
-                      width: '100%',
-                      alignItems: 'center',
-                      marginBottom: 9,
-                    }}>
-                    <Text
-                      style={{
-                        color: 'rgba(0, 0, 0, 0.68)',
-                        fontSize: 12,
-                        fontWeight: '500',
-                        lineHeight: 14.5,
-                      }}>
-                      {camFunc === e_CamFunc.IDENTIFY
-                        ? `${t('You have ')}${MAX_TRIAL_CAMERA_TIME}${t(
-                            ' plant scans per day',
-                          )}`
-                        : `${t('You have ')}${MAX_TRIAL_CAMERA_TIME}${t(
-                            ' diagnose scans per day',
-                          )}`}
-                    </Text>
-                  </View>
-                )}
                 {/* GetImage from lib */}
                 <View
                   style={{
@@ -959,15 +890,7 @@ const ScanScreen = () => {
                         color: 'rgba(75, 109, 78, 1)',
                         alignSelf: 'center',
                       }}>
-                      {`${textFunction} ${
-                        !isPre
-                          ? `(${
-                              camFunc === e_CamFunc.IDENTIFY
-                                ? trialScanTime.time
-                                : trialDiagnoseTime.time
-                            }/${MAX_TRIAL_CAMERA_TIME})`
-                          : ''
-                      }`}
+                      {textFunction}
                     </Text>
                   </TouchableOpacity>
                   <View style={{width: 62.67}}></View>

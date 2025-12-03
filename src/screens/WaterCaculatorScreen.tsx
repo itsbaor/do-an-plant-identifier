@@ -16,19 +16,15 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootParamList} from '~/navigations/RootNavigation';
 import {useModal} from 'react-native-modalfy';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import Config from 'react-native-config';
 import HeaderWithBack from '~/components/HeaderWithBack';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
 import FlexDropdown from '~/components/FlexDropdown';
 import DynamicallySelectedPicker from 'react-native-dynamically-selected-picker';
 import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import TextInputComponent from '~/components/TextInputComponent';
 import {statePlantStorage} from '~/redux/slices/plantStorageSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useRewardedAd, TestIds} from 'react-native-google-mobile-ads';
-import {setStateAdsOpen} from '~/redux/slices/adsOpenSlice';
 import {ERROR_NOTI_TIME} from './bottom-tabs/ScanScreen';
 
 enum DROPDOWN {
@@ -92,7 +88,6 @@ const WaterCaculatorScreen = () => {
   );
   const {openModal, closeModals, closeAllModals} = useModal();
   const dropdownWidth = useMemo(() => SCREEN_WIDTH - 98, [SCREEN_WIDTH]);
-  const adsRemote = useAppSelector(stateAdsRemote);
   const [potVolume, setPotVolume] = useState<string>('');
   const [potHeight, setPotHeight] = useState<string>('');
   const [potWidth, setPotWidth] = useState<string>('');
@@ -100,15 +95,7 @@ const WaterCaculatorScreen = () => {
   const [temperature, setTemperature] = useState<string>('0');
   const [checkValidation, setCheckValidation] = useState<boolean>(false);
   const isPre = useAppSelector(statePremium);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_CACULATOR.isOn,
-  );
-  const ID_ADS_NATIVE = __DEV__ ? undefined : adsRemote.NATIVE_CACULATOR.id;
-  const ID_ADS_REWARD = __DEV__
-    ? TestIds.REWARDED
-    : adsRemote.REWARD_CACULATOR.id;
   const theme = useAppTheme();
-  const rewardAds = useRewardedAd(ID_ADS_REWARD);
   const [choosenDropdownIndex, setChoosenDropdownIndex] = useState<number>(
     DROPDOWN.NONE,
   );
@@ -166,10 +153,6 @@ const WaterCaculatorScreen = () => {
 
   const handleDone = () => {
     closeModals('InformWaterNeedModal');
-    rewardAds.isLoaded &&
-      dispatch(setStateAdsOpen(false)) &&
-      !isPre &&
-      rewardAds.show();
     navigation.goBack();
   };
 
@@ -240,10 +223,6 @@ const WaterCaculatorScreen = () => {
   };
 
   useEffect(() => {
-    adsRemote.REWARD_CACULATOR.isOn && rewardAds.load();
-  }, [rewardAds.load]);
-
-  useEffect(() => {
     const getTrialWaterCaculation = async () => {
       try {
         let waterTime: t_DayTrial | string | null = await AsyncStorage.getItem(
@@ -276,7 +255,6 @@ const WaterCaculatorScreen = () => {
       style={[styles.container, {backgroundColor: theme.colors.bg_main}]}>
       <HeaderWithBack
         handleGoBack={() => navigation.goBack()}
-        waitingAds={waitingAds}
         title={t('Water Calculator')}
       />
       <View style={{flex: 1, paddingHorizontal: 20}}>
@@ -462,42 +440,14 @@ const WaterCaculatorScreen = () => {
           )}
         </View>
         <View style={{}}>
-          {adsRemote.NATIVE_CACULATOR.isOn && (
-            <View
-              style={{
-                width: '100%',
-                alignItems: 'center',
-                marginBottom: 9,
-                marginTop: 10,
-              }}>
-              <Text
-                style={{
-                  color: 'rgba(0, 0, 0, 0.68)',
-                  fontSize: 12,
-                  fontWeight: '500',
-                  lineHeight: 14.5,
-                }}>
-                {`${t('You have')} ${MAX_DAY_TRIAL_CACULATION} ${t(
-                  'water calculations per day',
-                )}`}
-              </Text>
-            </View>
-          )}
           {/* Button */}
           <TouchableOpacity
             style={[styles.button, {backgroundColor: theme.colors.primary}]}
             onPress={handlePressCaculate}>
-            <Text style={styles.buttonText}>{`${t('Caculate')} ${
-              adsRemote.NATIVE_CACULATOR.isOn
-                ? `(${trialWaterCaculation.time}/${MAX_DAY_TRIAL_CACULATION})`
-                : ''
-            }`}</Text>
+            <Text style={styles.buttonText}>{t('Caculate')}</Text>
           </TouchableOpacity>
         </View>
       </View>
-      {adsRemote.NATIVE_CACULATOR.isOn && (
-        <NativeBannerSmall adId={ID_ADS_NATIVE} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

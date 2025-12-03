@@ -33,8 +33,6 @@ import {
 } from '~/utils/reminderStorage';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import notifee from '@notifee/react-native';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
-import NativeItemReminder from '~/components/ads/NativeItemReminder';
 
 export const KEY_REMINDER_LIST = '@keyReminderList';
 
@@ -47,8 +45,6 @@ const Reminder = () => {
   const g_plantStorage = useAppSelector(statePlantStorage);
   const g_reminderStorage = useAppSelector(stateReminderStorage);
   const theme = useAppTheme();
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_REMINDER.id;
 
   const handleOpenIdentCam = () => {
     navigation.navigate('ScanScreen', {type: e_CamFunc.IDENTIFY});
@@ -201,10 +197,6 @@ const Reminder = () => {
                         </TouchableOpacity>
                       </View>
                     </TouchableOpacity>
-                    {(index + 1) % 3 == 0 &&
-                      adsRemote.NATIVE_ITEM_REMINDER.isOn && (
-                        <NativeItemReminder adId={ID_ADS_ITEM} />
-                      )}
                   </View>
                 ))}
               </ScrollView>

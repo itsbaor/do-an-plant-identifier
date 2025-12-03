@@ -21,10 +21,7 @@ import {Notifier, NotifierComponents} from 'react-native-notifier';
 import {getCareGuideDetail} from './PlantDetailScreen';
 import {plantData} from '~/data/plantData';
 import IconBack from '~/resources/icons/IconBack';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
-import NativeBannerSmall from '~/components/ads/NativeBannerSmall';
-import Config from 'react-native-config';
 import {t_PlantType} from '~/@types/plant';
 import SearchBar from '~/components/SearchBar';
 import NoDataFoundComponent from '~/components/NoDataFoundComponent';
@@ -32,7 +29,6 @@ import firestore from '@react-native-firebase/firestore';
 import {docGenAi} from './bottom-tabs/home/HomeScreen';
 import {findSmallestKeyValue} from './SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import NativeItemProblemCare from '~/components/ads/NativeItemProblemCare';
 import {stateLang} from '~/redux/slices/langSlices';
 
 const CareGuideScreen = () => {
@@ -43,16 +39,10 @@ const CareGuideScreen = () => {
   const {openModal, closeModals} = useModal();
   const [searchText, setSearchText] = useState<string>();
   const [plantCareData, setPlantCareData] = useState<t_PlantType[]>([]);
-  const adsRemote = useAppSelector(stateAdsRemote);
   const isPre = useAppSelector(statePremium);
   const theme = useAppTheme();
   const g_aiKey = useAppSelector(stateKeyAi);
   const g_lang = useAppSelector(stateLang);
-  const [waitingAds, setWaitingAds] = useState<boolean>(
-    adsRemote.NATIVE_SEARCH.isOn,
-  );
-  const ID_ADS = __DEV__ ? undefined : adsRemote.NATIVE_SEARCH.id;
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_PROBLEM.id;
 
   useEffect(() => {
     const startIndex = Math.floor(Math.random() * (plantData.length - 15));
@@ -118,13 +108,6 @@ const CareGuideScreen = () => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    waitingAds &&
-      openModal('LoadingModal', {
-        message: t('Loading data...'),
-      });
-    !waitingAds && closeModals('LoadingModal');
-  }, [waitingAds]);
 
   return (
     <SafeAreaView
@@ -166,62 +149,46 @@ const CareGuideScreen = () => {
         ) : (
           <ScrollView style={{paddingHorizontal: 20}}>
             <View style={styles.categoryListContainer}>
-              {plantCareData.map((item, index) =>
-                (index + 1) % 8 == 0 && adsRemote.NATIVE_ITEM_PROBLEM.isOn ? (
-                  <View
-                    key={index}
-                    style={{
-                      width: '50%',
-                      aspectRatio: 180 / 210,
-                      marginBottom: 15,
-                      paddingHorizontal: 4,
-                    }}>
-                    <NativeItemProblemCare adId={ID_ADS_ITEM} />
+              {plantCareData.map((item, index) => (
+                <View
+                  key={index}
+                  style={{
+                    width: '50%',
+                    aspectRatio: 180 / 210,
+                    marginBottom: 15,
+                    paddingHorizontal: 4,
+                  }}>
+                  <View key={index} style={[styles.categoryItemContainer]}>
+                    <TouchableOpacity
+                      style={[styles.categoryItem]}
+                      onPress={() => {
+                        handleGoToCareGuide(item.name, item.image);
+                      }}>
+                      <View style={{flex: 1}}>
+                        <Image
+                          style={{
+                            height: '100%',
+                            width: '100%',
+                            borderTopLeftRadius: 5,
+                            borderTopRightRadius: 5,
+                          }}
+                          resizeMode="cover"
+                          source={{uri: item.image} as ImageSourcePropType}
+                        />
+                      </View>
+                      <View style={{paddingVertical: 8, paddingLeft: 10}}>
+                        <Text style={[styles.textName]} numberOfLines={1}>
+                          {t(item.name)}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
                   </View>
-                ) : (
-                  <View
-                    key={index}
-                    style={{
-                      width: '50%',
-                      aspectRatio: 180 / 210,
-                      marginBottom: 15,
-                      paddingHorizontal: 4,
-                    }}>
-                    <View key={index} style={[styles.categoryItemContainer]}>
-                      <TouchableOpacity
-                        style={[styles.categoryItem]}
-                        onPress={() => {
-                          handleGoToCareGuide(item.name, item.image);
-                        }}>
-                        <View style={{flex: 1}}>
-                          <Image
-                            style={{
-                              height: '100%',
-                              width: '100%',
-                              borderTopLeftRadius: 5,
-                              borderTopRightRadius: 5,
-                            }}
-                            resizeMode="cover"
-                            source={{uri: item.image} as ImageSourcePropType}
-                          />
-                        </View>
-                        <View style={{paddingVertical: 8, paddingLeft: 10}}>
-                          <Text style={[styles.textName]} numberOfLines={1}>
-                            {t(item.name)}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ),
-              )}
+                </View>
+              ))}
             </View>
           </ScrollView>
         )}
       </View>
-      {adsRemote.NATIVE_SEARCH.isOn && (
-        <NativeBannerSmall adId={ID_ADS} setWaitAds={setWaitingAds} />
-      )}
     </SafeAreaView>
   );
 };

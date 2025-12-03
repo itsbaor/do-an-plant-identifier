@@ -36,8 +36,6 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue} from '~/screens/SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
-import NativeItemGarden from '~/components/ads/NativeItemGarden';
-import {stateAdsRemote} from '~/redux/slices/adsRemoteSlice';
 import {stateLang} from '~/redux/slices/langSlices';
 
 export const KEY_PLANT_LIST = '@plant_list';
@@ -52,8 +50,6 @@ const MyGarden = () => {
   const theme = useAppTheme();
   const {openModal, closeModals} = useModal();
   const [loading, setLoading] = useState(true);
-  const adsRemote = useAppSelector(stateAdsRemote);
-  const ID_ADS_ITEM = __DEV__ ? undefined : adsRemote.NATIVE_ITEM_HOME.id;
 
   const handleOpenAddPlantModal = () => {
     openModal('AddPlantModal', {
@@ -200,20 +196,14 @@ const MyGarden = () => {
           <View style={{flex: 1}}>
             <ScrollView style={{}}>
               {g_plantStorage.map((plant, index) => (
-                <View key={index}>
-                  <PlantItem
-                    key={index}
-                    plant={plant}
-                    handleOpenDetails={() => handleGoToDetail(plant)}
-                    handleRemovePlantFromGarden={() =>
-                      openConfirmModal(plant.name)
-                    }
-                  />
-                  {(index + 1) % 3 == 0 &&
-                    adsRemote.NATIVE_ITEM_MY_GARDEN.isOn && (
-                      <NativeItemGarden adId={ID_ADS_ITEM} />
-                    )}
-                </View>
+                <PlantItem
+                  key={index}
+                  plant={plant}
+                  handleOpenDetails={() => handleGoToDetail(plant)}
+                  handleRemovePlantFromGarden={() =>
+                    openConfirmModal(plant.name)
+                  }
+                />
               ))}
               <View style={{height: 30}}></View>
             </ScrollView>
