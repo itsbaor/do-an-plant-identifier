@@ -65,8 +65,9 @@ export const getDetailPlant = async (
   lang: t_Lang,
 ) => {
   try {
+    // Try to get detailed info from AI
     const genAi = new GoogleGenerativeAI(genAiKey);
-    const model = genAi.getGenerativeModel({model: AI_MODEL});
+    const model = genAi.getGenerativeModel({model: 'gemini-pro'});
     incrementMapValue(docGenAi, genAiKey);
     const result = await model.generateContent([
       getPromtDetailPlant(lang),
@@ -95,7 +96,27 @@ export const getDetailPlant = async (
     return detailResult;
   } catch (error) {
     console.error('Dev defined error get plant detail: ', error);
-    return null;
+
+    // Return basic plant details without AI as fallback
+    const fallbackDetail: t_PlantDetail = {
+      name: plant.name || 'Unknown Plant',
+      image: plant.image,
+      lifeSpan: plant.lifeSpan || 'Perennial',
+      family: 'Information not available',
+      origin: ['Information not available'],
+      description: `${plant.name} is a plant species. For detailed information, please check botanical references.`,
+      commonName: plant.commonName || plant.name,
+      type: plant.lifeSpan || 'Perennial',
+      flower: 'Information not available',
+      branches: 'Information not available',
+      twigs: 'Information not available',
+      leafs: 'Information not available',
+      propagation: ['Seeds', 'Cuttings'],
+      watering: Array.isArray(plant.watering) ? plant.watering : [plant.watering || 'Average'],
+      sunlight: Array.isArray(plant.sunlight) ? plant.sunlight : [plant.sunlight || 'Full Sun'],
+      height: 'Varies',
+    };
+    return fallbackDetail;
   }
 };
 

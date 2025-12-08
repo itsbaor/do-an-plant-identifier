@@ -225,7 +225,7 @@ const IdentifyResultScreen = () => {
                         name: item.name,
                         treeLike: item.other_name,
                         image:
-                          item.image &&
+                          item.image ||
                           require('~/resources/images/home/tropicalPlant.png'),
                         type: item.life_span as CYCLE,
                         waterlevel: item.watering as WATERING,
