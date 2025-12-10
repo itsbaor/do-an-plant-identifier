@@ -1,4 +1,4 @@
-package com.ichime.plant.identifier.id
+package com.doan.plant.dentify.firebase
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

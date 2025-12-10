@@ -388,18 +388,103 @@ const ScanScreen = () => {
         return;
       }
 
-      // Format result for display - Map Plant.id data to expected format
-      const resultData = {
+      console.log('Plant data received:', {
         name: plantData.name,
-        image: plantData.image,
-        other_name: plantData.common_names?.[0] || plantData.scientific_name || plantData.name,
-        life_span: 'Perennial', // Default value - can be enhanced with AI later
-        watering: 'Average', // Default value
-        sunlight: 'Full Sun', // Default value
-        probability: plantData.probability,
         scientific_name: plantData.scientific_name,
         common_names: plantData.common_names,
+        has_watering: !!plantData.watering,
+        has_taxonomy: !!plantData.taxonomy,
+        has_propagation: !!plantData.propagation_methods,
+        image: plantData.image?.substring(0, 50) + '...',
+      });
+
+      // Helper function to get common name from scientific name
+      const getCommonName = (scientificName: string, commonNames?: string[]): string => {
+        // If we have common names from API, use the first one
+        if (commonNames && commonNames.length > 0) {
+          return commonNames[0];
+        }
+
+        // Otherwise, try to generate a readable common name from scientific name
+        // Example: "Dracaena angolensis" -> "Dracaena"
+        const parts = scientificName.split(' ');
+        return parts[0]; // Return genus name as common name
       };
+
+      // Helper function to convert watering frequency to readable text
+      // Returns values that match the WATERING enum: 'Frequent', 'Average', 'Minimal'
+      const getWateringText = (watering: {max?: number; min?: number} | undefined): string => {
+        if (!watering || typeof watering !== 'object') return 'Average';
+
+        const max = watering.max;
+        const min = watering.min;
+
+        if (!max && !min) return 'Average';
+
+        const avg = ((max || 7) + (min || 7)) / 2;
+
+        // Convert days to watering frequency (matching WATERING enum)
+        if (avg <= 3) return 'Frequent'; // Every 1-3 days = Frequent watering
+        if (avg <= 7) return 'Average'; // Every 4-7 days = Average watering
+        return 'Minimal'; // More than 7 days = Minimal watering
+      };
+
+      // Helper function to determine life span from scientific name or data
+      const getLifeSpan = (plantData: any): string => {
+        try {
+          const name = plantData.name?.toLowerCase() || '';
+
+          // Check for known annual plants
+          if (name.includes('annual') || name.includes('zea mays') || name.includes('helianthus annuus')) {
+            return 'Annual';
+          }
+
+          // Check for known biennial plants
+          if (name.includes('biennial') || name.includes('daucus carota') || name.includes('beta vulgaris')) {
+            return 'Biennial';
+          }
+
+          // Check taxonomy if available
+          const taxonomy = plantData.taxonomy;
+          if (taxonomy?.class === 'Magnoliopsida' || taxonomy?.class === 'Liliopsida') {
+            return 'Perennial';
+          }
+
+          // Check propagation methods for hints
+          const propagMethods = plantData.propagation_methods || [];
+          if (Array.isArray(propagMethods) && propagMethods.includes('seeds') && !propagMethods.includes('division')) {
+            return 'Annual';
+          }
+        } catch (e) {
+          console.log('Error determining life span:', e);
+        }
+
+        return 'Perennial'; // Default to perennial (most plants are)
+      };
+
+      // Format result for display - Map Plant.id data to expected format
+      const scientificName = plantData.name || 'Unknown Plant';
+      const commonName = getCommonName(scientificName, plantData.common_names);
+
+      const resultData = {
+        name: scientificName,
+        image: plantData.image || require('~/resources/images/home/tropicalPlant.png'),
+        other_name: commonName,
+        life_span: getLifeSpan(plantData),
+        watering: getWateringText(plantData.watering),
+        sunlight: 'Full Sun', // Plant.id doesn't provide sunlight data
+        probability: plantData.probability,
+        scientific_name: scientificName,
+        common_names: plantData.common_names || [],
+      };
+
+      console.log('Formatted result:', {
+        name: resultData.name,
+        other_name: resultData.other_name,
+        life_span: resultData.life_span,
+        watering: resultData.watering,
+        hasImage: !!resultData.image,
+      });
 
       closeModals('LoadingModal');
       decrementMapValue('key', plantIdApiKey);

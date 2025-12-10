@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, TextInput, Button, HelperText, ActivityIndicator, Divider } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootParamList } from "~/navigations/RootNavigation";
+import { saveAuthData } from "~/services/authService";
 
 /**
  * React Native Login / Register screen (English version)
@@ -78,11 +78,14 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
       if (!res.ok) throw new Error((data && (data.error || data.message)) || "An error occurred");
 
       if (mode === "login") {
-        if (data?.token && remember) {
-          await AsyncStorage.setItem("auth_token", String(data.token));
+        if (data?.token && data?.user && remember) {
+          // Save auth data using authService
+          await saveAuthData(data.token, data.user, data.expiresIn);
         }
         setMessage("Login successful!");
-        navigation.navigate('BottomTabNavigation', {screen: 'HomeScreen'});
+        setTimeout(() => {
+          navigation.replace('BottomTabNavigation', {screen: 'HomeScreen'});
+        }, 500);
       } else {
         setMessage("Registration successful! Please log in.");
         setMode("login");

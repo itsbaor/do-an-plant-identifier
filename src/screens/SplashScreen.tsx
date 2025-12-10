@@ -24,6 +24,7 @@ import {setStatePremium} from '~/redux/slices/premiumSlice';
 import {statePremium} from '~/redux/slices/premiumSlice';
 import {CHAT, t_Chat} from '~/@types/chat';
 import {CHAT_KEY, setStateChat} from '~/redux/slices/chatDataSlice';
+import {checkAutoLogin} from '~/services/authService';
 
 const ONE_WEEK_DURATION = 7 * 24 * 60 * 60 * 1000;
 const ONE_YEAR_DURATION = 365 * 24 * 60 * 60 * 1000;
@@ -115,9 +116,22 @@ const SplashScreen = () => {
 
   const loadScreen = async (isSub = false) => {
     try {
-      navigation.navigate('Login');
+      // Check if user is already logged in
+      const authData = await checkAutoLogin();
+
+      if (authData && authData.token && authData.user) {
+        // User is logged in, navigate to home screen
+        console.log('Auto-login successful, navigating to home');
+        navigation.replace('BottomTabNavigation', {screen: 'HomeScreen'});
+      } else {
+        // User is not logged in, navigate to login screen
+        console.log('No valid session found, navigating to login');
+        navigation.navigate('Login');
+      }
     } catch (error) {
       console.error('Dev defined error: ', error);
+      // On error, default to login screen
+      navigation.navigate('Login');
     }
   };
 

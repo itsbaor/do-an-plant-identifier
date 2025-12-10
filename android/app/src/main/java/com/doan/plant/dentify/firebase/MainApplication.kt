@@ -1,4 +1,4 @@
-package com.ichime.plant.identifier.id
+package com.doan.plant.dentify.firebase
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,7 +10,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
-import com.ichime.plant.identifier.id.WifiSettingsPackage
+import com.doan.plant.dentify.firebase.WifiSettingsPackage
 
 class MainApplication : Application(), ReactApplication {
 

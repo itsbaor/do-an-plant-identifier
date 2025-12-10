@@ -30,6 +30,8 @@ import {stateLang} from '~/redux/slices/langSlices';
 import {langList} from '~/data/languageData';
 import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import IconBlink from '~/resources/icons/bottom-tabs/home/IconBlink';
+import {logout, getUserData} from '~/services/authService';
+import {Alert} from 'react-native';
 
 const SettingScreen = () => {
   const {t} = useTranslation();
@@ -44,6 +46,18 @@ const SettingScreen = () => {
   );
   const curLang = String(curLangObject?.name);
   const theme = useAppTheme();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Load user data on mount
+  React.useEffect(() => {
+    const loadUserData = async () => {
+      const userData = await getUserData();
+      if (userData) {
+        setUserEmail(userData.email);
+      }
+    };
+    loadUserData();
+  }, []);
 
   const handleChooseLanguage = () => {
     navigation.push('LanguageScreen');
@@ -70,6 +84,30 @@ const SettingScreen = () => {
     // Navigate to the privacy policy screen
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      t('Logout'),
+      t('Are you sure you want to logout?'),
+      [
+        {
+          text: t('Cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('Logout'),
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Login'}],
+            });
+          },
+        },
+      ],
+    );
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -92,6 +130,19 @@ const SettingScreen = () => {
         {t('Profile')}
       </Text>
       <View style={{flex: 1, paddingHorizontal: 15}}>
+        {/* User Info Section */}
+        {userEmail && (
+          <View style={styles.userInfoContainer}>
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarText}>{userEmail.charAt(0).toUpperCase()}</Text>
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.userEmail}>{userEmail}</Text>
+              <Text style={styles.userStatus}>{t('Logged in')}</Text>
+            </View>
+          </View>
+        )}
+
         <TouchableOpacity
           style={styles.itemMenu}
           onPress={handleChooseLanguage}>
@@ -127,6 +178,17 @@ const SettingScreen = () => {
           </View>
           <IconDetail />
         </TouchableOpacity>
+
+        {/* Logout Button */}
+        {userEmail && (
+          <TouchableOpacity style={[styles.itemMenu, styles.logoutItem]} onPress={handleLogout}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={[styles.logoutIcon, {marginRight: 8}]}>🚪</Text>
+              <Text style={[styles.textMenu, {color: theme.colors.text_error}]}>{t('Logout')}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
         <View
           style={{
             marginTop: 20,
@@ -271,5 +333,43 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     maxWidth: SCREEN_WIDTH * 0.3,
     textAlign: 'center',
+  },
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#32A05F',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  userEmail: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 2,
+  },
+  userStatus: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  logoutItem: {
+    borderColor: '#E51818',
+  },
+  logoutIcon: {
+    fontSize: 18,
   },
 });

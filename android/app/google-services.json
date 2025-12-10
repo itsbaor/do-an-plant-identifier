@@ -1,29 +1,28 @@
 {
   "project_info": {
-    "project_number": "775348186583",
-    "project_id": "icm005-plant-identifier",
-    "storage_bucket": "icm005-plant-identifier.firebasestorage.app"
+    "project_number": "851634949232",
+    "project_id": "plant-identify-do",
+    "storage_bucket": "plant-identify-do.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:775348186583:android:b4288731c3317366182f92",
+        "mobilesdk_app_id": "1:851634949232:android:a6b3a0d906ad2393c3b8b5",
         "android_client_info": {
-          "package_name": "com.ichime.plant.identifier.id"
+          "package_name": "com.doan.plant.dentify.firebase"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBwS9YWhBDZPjzq1pV3evpI9-u1JYVkR9c"
+          "current_key": "AIzaSyC5_ZIgNnlHQZzVt2etlKSZeDx0XzvYfxY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": []
         }
-      },
-      "admob_app_id": "ca-app-pub-5540714455115639~3961114748"
+      }
     }
   ],
   "configuration_version": "1"

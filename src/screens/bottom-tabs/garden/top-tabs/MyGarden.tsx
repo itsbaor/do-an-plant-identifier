@@ -37,6 +37,7 @@ import firestore from '@react-native-firebase/firestore';
 import {findSmallestKeyValue} from '~/screens/SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import {stateLang} from '~/redux/slices/langSlices';
+import Config from 'react-native-config';
 
 export const KEY_PLANT_LIST = '@plant_list';
 
@@ -112,7 +113,7 @@ const MyGarden = () => {
         watering: plant.waterlevel,
         sunlight: plant.sunlevel,
       },
-      g_aiKey,
+      Config.API_KEY_GENAI,
       g_lang,
     );
     plantDetail

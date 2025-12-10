@@ -64,58 +64,68 @@ export const getDetailPlant = async (
   genAiKey: string,
   lang: t_Lang,
 ) => {
+  // Create fallback detail first
+  const fallbackDetail: t_PlantDetail = {
+    name: plant.name || 'Unknown Plant',
+    image: plant.image,
+    lifeSpan: plant.lifeSpan || 'Perennial',
+    family: 'Information not available',
+    origin: ['Information not available'],
+    description: `${plant.name} is a plant species. For detailed information, please check botanical references.`,
+    commonName: plant.commonName || plant.name,
+    type: plant.lifeSpan || 'Perennial',
+    flower: ['Information not available'],
+    branches: 'Information not available',
+    twigs: 'Information not available',
+    leafs: 'Information not available',
+    propagation: ['Seeds', 'Cuttings'],
+    watering: Array.isArray(plant.watering) ? plant.watering : [plant.watering || 'Average'],
+    sunlight: Array.isArray(plant.sunlight) ? plant.sunlight : [plant.sunlight || 'Full Sun'],
+    height: 'Varies',
+  };
+
   try {
     // Try to get detailed info from AI
     const genAi = new GoogleGenerativeAI(genAiKey);
-    const model = genAi.getGenerativeModel({model: 'gemini-pro'});
-    incrementMapValue(docGenAi, genAiKey);
-    const result = await model.generateContent([
-      getPromtDetailPlant(lang),
-      plant.name,
-    ]);
-    // Modified result from AI
-    const plantDetailByAi = resolveResponseFromAi(result.response.text());
-    const detailResult: t_PlantDetail = {
-      name: plant.name || 'None',
-      image: plant.image,
-      lifeSpan: plant.lifeSpan || 'None',
-      family: plantDetailByAi.family || 'None',
-      origin: plantDetailByAi.origin || ['None'],
-      description: plantDetailByAi.description || 'None',
-      commonName: plant.commonName || 'None',
-      type: plantDetailByAi.type || 'None',
-      flower: plantDetailByAi.flower,
-      branches: plantDetailByAi.branches,
-      twigs: plantDetailByAi.twigs,
-      leafs: plantDetailByAi.leafs,
-      propagation: plantDetailByAi.propagation || ['None'],
-      watering: plantDetailByAi.watering || ['None'],
-      sunlight: plantDetailByAi.sunlight || ['None'],
-      height: plantDetailByAi.height || 'None',
-    };
-    return detailResult;
+
+    // Use the configured AI model from environment
+    let modelName = AI_MODEL;
+    try {
+      const model = genAi.getGenerativeModel({model: modelName});
+      // Firebase tracking removed - using .env key directly
+      const result = await model.generateContent([
+        getPromtDetailPlant(lang),
+        plant.name,
+      ]);
+
+      // Modified result from AI
+      const plantDetailByAi = resolveResponseFromAi(result.response.text());
+      const detailResult: t_PlantDetail = {
+        name: plant.name || 'None',
+        image: plant.image,
+        lifeSpan: plant.lifeSpan || 'None',
+        family: plantDetailByAi.family || 'Information not available',
+        origin: plantDetailByAi.origin || ['Information not available'],
+        description: plantDetailByAi.description || fallbackDetail.description,
+        commonName: plant.commonName || 'None',
+        type: plantDetailByAi.type || plant.lifeSpan || 'Perennial',
+        flower: plantDetailByAi.flower || ['Information not available'],
+        branches: plantDetailByAi.branches || 'Information not available',
+        twigs: plantDetailByAi.twigs || 'Information not available',
+        leafs: plantDetailByAi.leafs || 'Information not available',
+        propagation: plantDetailByAi.propagation || ['Seeds', 'Cuttings'],
+        watering: plantDetailByAi.watering || fallbackDetail.watering,
+        sunlight: plantDetailByAi.sunlight || fallbackDetail.sunlight,
+        height: plantDetailByAi.height || 'Varies',
+      };
+      console.log('AI enhancement successful');
+      return detailResult;
+    } catch (modelError: any) {
+      console.log('AI model error, using fallback:', modelError.message);
+      return fallbackDetail;
+    }
   } catch (error) {
     console.error('Dev defined error get plant detail: ', error);
-
-    // Return basic plant details without AI as fallback
-    const fallbackDetail: t_PlantDetail = {
-      name: plant.name || 'Unknown Plant',
-      image: plant.image,
-      lifeSpan: plant.lifeSpan || 'Perennial',
-      family: 'Information not available',
-      origin: ['Information not available'],
-      description: `${plant.name} is a plant species. For detailed information, please check botanical references.`,
-      commonName: plant.commonName || plant.name,
-      type: plant.lifeSpan || 'Perennial',
-      flower: 'Information not available',
-      branches: 'Information not available',
-      twigs: 'Information not available',
-      leafs: 'Information not available',
-      propagation: ['Seeds', 'Cuttings'],
-      watering: Array.isArray(plant.watering) ? plant.watering : [plant.watering || 'Average'],
-      sunlight: Array.isArray(plant.sunlight) ? plant.sunlight : [plant.sunlight || 'Full Sun'],
-      height: 'Varies',
-    };
     return fallbackDetail;
   }
 };
@@ -211,7 +221,7 @@ const HomeScreen = () => {
         watering: plant.waterlevel,
         sunlight: plant.sunlevel,
       },
-      g_aiKey,
+      Config.API_KEY_GENAI,
       g_lang,
     );
     plantDetail

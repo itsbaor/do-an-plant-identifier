@@ -101,7 +101,7 @@ const SearchScreen = () => {
         watering: plant.waterlevel,
         sunlight: plant.sunlevel,
       },
-      g_aiKey,
+      Config.API_KEY_GENAI,
       g_lang,
     );
     plantDetail

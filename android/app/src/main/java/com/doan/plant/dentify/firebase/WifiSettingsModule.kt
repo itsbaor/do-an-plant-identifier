@@ -1,4 +1,4 @@
-package com.ichime.plant.identifier.id
+package com.doan.plant.dentify.firebase
 
 import android.content.Intent
 import android.provider.Settings

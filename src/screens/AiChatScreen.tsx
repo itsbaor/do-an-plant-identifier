@@ -37,6 +37,7 @@ import {GoogleGenerativeAI} from '@google/generative-ai';
 import {ERROR_NOTI_TIME} from './bottom-tabs/ScanScreen';
 import {t_Lang} from '~/@types/language';
 import {stateLang} from '~/redux/slices/langSlices';
+import Config from 'react-native-config';
 
 export const AI_CHAT_STORAGE_KEY = '$ai_chat';
 
@@ -93,10 +94,10 @@ const AiChatScreen = () => {
     try {
       // Send question to AI and get response
       // Wait AI resolve answer
-      const curKey = g_aiKey;
+      const curKey = Config.API_KEY_GENAI; // Use .env API key directly
       const genAi = new GoogleGenerativeAI(curKey);
       const model = genAi.getGenerativeModel({model: AI_MODEL});
-      incrementMapValue(docGenAi, curKey);
+      // Firebase tracking removed - using .env key directly
       const result = await model.generateContent([getPromtAi(lang), question]);
       setIsAiAnswering(false);
       const aiAnswer = result.response.text();

@@ -43,6 +43,7 @@ import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import {GoogleGenerativeAI} from '@google/generative-ai';
 import {stateLang} from '~/redux/slices/langSlices';
 import {t_Lang} from '~/@types/language';
+import Config from 'react-native-config';
 
 export const getCareGuideDetail = async (
   name: string,
@@ -54,7 +55,7 @@ export const getCareGuideDetail = async (
     //Asked AI
     const genAi = new GoogleGenerativeAI(genAiKey);
     const model = genAi.getGenerativeModel({model: AI_MODEL});
-    incrementMapValue(docGenAi, genAiKey);
+    // Firebase tracking removed - using .env key directly
     const result = await model.generateContent([
       getPromtDetailCareGuide(lang),
       name,
@@ -100,7 +101,7 @@ const PlantDetailScreen = () => {
     const careGuidDetail = await getCareGuideDetail(
       plantDetail.name,
       plantDetail.image,
-      g_aiKey,
+      Config.API_KEY_GENAI,
       g_lang,
     );
     careGuidDetail
