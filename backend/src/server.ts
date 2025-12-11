@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRouter from "./auth";
+import plantsRouter from "./plants";
+import remindersRouter from "./reminders";
 import db from "./db";
 
 dotenv.config();
@@ -13,6 +15,8 @@ app.use(express.json());
 app.get("/", (_req, res) => res.json({ ok: true, service: "Plant Auth API (MySQL)" }));
 
 app.use("/api/auth", authRouter);
+app.use("/api/plants", plantsRouter);
+app.use("/api/reminders", remindersRouter);
 
 const port = Number(process.env.PORT || 3000);
 

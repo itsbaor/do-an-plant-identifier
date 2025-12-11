@@ -36,6 +36,7 @@ import notifee, {
   RepeatFrequency,
 } from '@notifee/react-native';
 import {PermissionsAndroid} from 'react-native';
+import {getUserData} from '~/services/authService';
 
 async function requestNotificationPermission() {
   let isAllowed = false;
@@ -63,7 +64,12 @@ async function requestNotificationPermission() {
 }
 
 async function scheduleNotification(reminderObj: t_Reminder) {
-  const channelId = reminderObj.task + reminderObj.plantName;
+  // Use new channel ID format with userId
+  const userData = await getUserData();
+  const channelId = userData
+    ? `${reminderObj.task}_${reminderObj.plantName}_${userData.id}`
+    : `${reminderObj.task}${reminderObj.plantName}`;
+
   // Create a channel (required for Android)
   await notifee.createChannel({
     id: channelId,

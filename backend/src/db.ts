@@ -49,6 +49,55 @@ export async function getPool() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);`).catch(() => {});
+
+    // Create plants table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS plants (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        image TEXT NOT NULL,
+        tree_like VARCHAR(255) NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        water_level VARCHAR(50) NOT NULL,
+        sun_level VARCHAR(50) NOT NULL,
+        growth VARCHAR(50),
+        category JSON,
+        shared_with JSON,
+        is_public BOOLEAN DEFAULT FALSE,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_plants (user_id, created_at),
+        INDEX idx_plant_name (user_id, name)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Create reminders table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        plant_id INT,
+        plant_name VARCHAR(255) NOT NULL,
+        plant_image TEXT NOT NULL,
+        task VARCHAR(50) NOT NULL,
+        repeat_frequency VARCHAR(50) NOT NULL,
+        time_repeat VARCHAR(20) NOT NULL,
+        create_date DATETIME(6) NOT NULL,
+        notification_channel_id VARCHAR(255) NOT NULL,
+        device_tokens JSON,
+        last_triggered_at DATETIME(6),
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (plant_id) REFERENCES plants(id) ON DELETE SET NULL,
+        UNIQUE KEY unique_user_plant_task (user_id, plant_name, task),
+        INDEX idx_user_reminders (user_id, is_active),
+        INDEX idx_reminder_schedule (user_id, repeat_frequency, time_repeat)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
   }
   return pool;
 }

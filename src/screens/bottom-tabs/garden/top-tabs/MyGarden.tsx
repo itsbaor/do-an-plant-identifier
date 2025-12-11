@@ -27,7 +27,8 @@ import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import PlantItem from '~/components/search/PlantItem';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import {getDetailPlant} from '../../home/HomeScreen';
-import {removePlantFromStorage} from '~/utils/plantStorage';
+import {removePlantFromStorage, fetchPlants} from '~/utils/plantStorage';
+import {migrateDataToBackend} from '~/services/migrationService';
 import IconRemove from '~/resources/icons/garden/IconRemove';
 import {
   setStatePlantStorage,
@@ -91,11 +92,20 @@ const MyGarden = () => {
 
   const getPlantInStorage = async () => {
     setLoading(true);
-    const plantData = await AsyncStorage.getItem(KEY_PLANT_LIST);
-    if (plantData) {
-      dispatch(setStatePlantStorage(JSON.parse(plantData)));
-    } else {
+    try {
+      const plants = await fetchPlants();
+      dispatch(setStatePlantStorage(plants));
+    } catch (error) {
+      console.error('Error loading plants:', error);
       dispatch(setStatePlantStorage([]));
+      Notifier.showNotification({
+        title: t('Error'),
+        description: t('Failed to load plants'),
+        Component: NotifierComponents.Alert,
+        componentProps: {
+          alertType: 'error',
+        },
+      });
     }
     setLoading(false);
   };
@@ -130,6 +140,22 @@ const MyGarden = () => {
         });
     closeModals('LoadingModal');
   };
+
+  // Trigger migration on component mount
+  useEffect(() => {
+    const performMigration = async () => {
+      const migrationResult = await migrateDataToBackend();
+      if (
+        migrationResult.success &&
+        (migrationResult.plantsMigrated || migrationResult.remindersMigrated)
+      ) {
+        console.log('Migration completed:', migrationResult);
+        // Refresh data from backend after migration
+        getPlantInStorage();
+      }
+    };
+    performMigration();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = firestore()

@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootParamList } from "~/navigations/RootNavigation";
 import { saveAuthData } from "~/services/authService";
+import { migrateDataToBackend } from "~/services/migrationService";
 
 /**
  * React Native Login / Register screen (English version)
@@ -82,6 +83,11 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
           // Save auth data using authService
           await saveAuthData(data.token, data.user, data.expiresIn);
         }
+
+        // Trigger migration after successful login
+        const migrationResult = await migrateDataToBackend();
+        console.log('Migration result:', migrationResult);
+
         setMessage("Login successful!");
         setTimeout(() => {
           navigation.replace('BottomTabNavigation', {screen: 'HomeScreen'});

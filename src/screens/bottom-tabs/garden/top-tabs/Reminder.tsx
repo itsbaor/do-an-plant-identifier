@@ -30,9 +30,12 @@ import IconFertilize from '~/resources/icons/garden/IconFertilize';
 import {
   removeAllReminderFromStorage,
   removeReminderFromStorage,
+  fetchReminders,
 } from '~/utils/reminderStorage';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import notifee from '@notifee/react-native';
+import {getUserData} from '~/services/authService';
+import {useFocusEffect} from '@react-navigation/native';
 
 export const KEY_REMINDER_LIST = '@keyReminderList';
 
@@ -70,7 +73,12 @@ const Reminder = () => {
 
   const handleDeteleReminder = async (plantName: string, task: e_Task) => {
     try {
-      await notifee.deleteChannel(task + plantName); // Replace with your actual channel ID
+      // Use new channel ID format with userId
+      const userData = await getUserData();
+      const channelId = userData
+        ? `${task}_${plantName}_${userData.id}`
+        : `${task}${plantName}`;
+      await notifee.deleteChannel(channelId);
       console.log('Notification channel deleted successfully');
       closeModals('RemoveSingleReminderModal');
       const res = await removeReminderFromStorage(plantName, task);
@@ -87,6 +95,18 @@ const Reminder = () => {
       console.log('Error deleting notification channel:', error);
     }
   };
+
+  // Load reminders from backend on screen focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadReminders = async () => {
+        const reminders = await fetchReminders();
+        dispatch(setStateReminderStorage(reminders));
+      };
+      loadReminders();
+      return () => {};
+    }, []),
+  );
 
   return (
     <View style={[styles.container, {backgroundColor: theme.colors.bg_main}]}>

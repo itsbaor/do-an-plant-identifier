@@ -53,6 +53,9 @@ import {findSmallestKeyValue, incrementMapValue} from '~/screens/SplashScreen';
 import {setStateKeyAi, stateKeyAi} from '~/redux/slices/keyAiSlice';
 import {t_Lang} from '~/@types/language';
 import {stateLang} from '~/redux/slices/langSlices';
+import {fetchPlants} from '~/utils/plantStorage';
+import {fetchReminders} from '~/utils/reminderStorage';
+import {migrateDataToBackend} from '~/services/migrationService';
 
 export const GENAI = new GoogleGenerativeAI(Config.API_KEY_GENAI);
 export const AI_MODEL = Config.AI_MODEL;
@@ -238,23 +241,14 @@ const HomeScreen = () => {
   };
 
   const getPlantInStorage = async () => {
-    const plantData = await AsyncStorage.getItem(KEY_PLANT_LIST);
-    if (plantData) {
-      dispatch(setStatePlantStorage(JSON.parse(plantData)));
-      return JSON.parse(plantData);
-    } else {
-      dispatch(setStatePlantStorage([]));
-      return [];
-    }
+    const plants = await fetchPlants();
+    dispatch(setStatePlantStorage(plants));
+    return plants;
   };
 
   const getReminderInStorage = async () => {
-    const reminderData = await AsyncStorage.getItem(KEY_REMINDER_LIST);
-    if (reminderData) {
-      dispatch(setStateReminderStorage(JSON.parse(reminderData)));
-    } else {
-      dispatch(setStatePlantStorage([]));
-    }
+    const reminders = await fetchReminders();
+    dispatch(setStateReminderStorage(reminders));
   };
 
   const handleSearch = () => {
@@ -309,8 +303,31 @@ const HomeScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      getPlantInStorage();
-      getReminderInStorage();
+      const initializeData = async () => {
+        // Trigger migration if needed
+        const migrationResult = await migrateDataToBackend();
+        if (
+          migrationResult.success &&
+          (migrationResult.plantsMigrated || migrationResult.remindersMigrated)
+        ) {
+          Notifier.showNotification({
+            title: t('Data Synced'),
+            description: t(
+              'Your plants and reminders have been synced to the cloud',
+            ),
+            Component: NotifierComponents.Alert,
+            componentProps: {
+              alertType: 'success',
+            },
+          });
+        }
+
+        // Load plants and reminders
+        await getPlantInStorage();
+        await getReminderInStorage();
+      };
+
+      initializeData();
       return () => {};
     }, []),
   );
