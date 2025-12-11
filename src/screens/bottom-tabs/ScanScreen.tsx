@@ -306,10 +306,10 @@ const ScanScreen = () => {
         }));
 
       // Use AI to enhance results
-      const curAiKey = g_aiKey;
+      const curAiKey = Config.API_KEY_GENAI;
       const genAi = new GoogleGenerativeAI(curAiKey);
       const model = genAi.getGenerativeModel({model: AI_MODEL});
-      incrementMapValue(docGenAi, curAiKey);
+      // Firebase tracking removed - using .env key directly
 
       const result = await model.generateContent([
         prompt,
@@ -318,7 +318,7 @@ const ScanScreen = () => {
 
       const indexOfOpen = result.response.text().indexOf('[');
       closeModals('LoadingModal');
-      decrementMapValue('key', idenKeyNow);
+      // Firebase tracking removed - using .env key directly
 
       // Navigate to result screen
       navigation.navigate('IdentifyResultScreen', {
@@ -560,7 +560,7 @@ const ScanScreen = () => {
       );
 
       closeModals('LoadingModal');
-      decrementMapValue('key', diagKeyNow);
+      // Firebase tracking removed - using .env key directly
 
       // Navigate to result screen
       navigation.navigate('DiagnoseResultScreen', {
@@ -644,7 +644,7 @@ const ScanScreen = () => {
       };
 
       closeModals('LoadingModal');
-      decrementMapValue('key', plantIdApiKey);
+      // Firebase tracking removed - using .env key directly
 
       // Navigate to result screen
       navigation.navigate('DiagnoseResultScreen', {

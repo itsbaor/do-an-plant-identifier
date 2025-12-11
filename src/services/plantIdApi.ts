@@ -378,15 +378,7 @@ export const diagnosePlant = async (
         {
           images: [base64WithPrefix],
           similar_images: true,
-          disease_details: [
-            'local_name',
-            'description',
-            'url',
-            'treatment',
-            'classification',
-            'common_names',
-            'cause',
-          ],
+          disease_model: 'full',
         },
         {
           headers: {
