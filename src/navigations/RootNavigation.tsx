@@ -33,6 +33,9 @@ import SelectPlantScreen from '~/screens/addReminder/SelectPlantScreen';
 import SelectTaskScreen from '~/screens/addReminder/SelectTaskScreen';
 import SelectScheduleScreen from '~/screens/addReminder/SelectScheduleScreen';
 import Login from '~/screens/authen/login';
+import AdminDashboard from '~/screens/admin/AdminDashboard';
+import UserManagement from '~/screens/admin/UserManagement';
+import ArticleManagement from '~/screens/admin/ArticleManagement';
 
 //Type for RootParamList, contains param pass through each screen
 export type RootParamList = {
@@ -73,6 +76,9 @@ export type RootParamList = {
   };
   LightMeterScreen: undefined;
   WaterCaculatorScreen: {plantName: string};
+  AdminDashboard: undefined;
+  UserManagement: undefined;
+  ArticleManagement: undefined;
 };
 
 //Stack navigation options
@@ -213,6 +219,21 @@ const RootNavigation = () => {
       <Stack.Screen
         name="CareGuideScreen"
         component={CareGuideScreen}
+        options={{gestureEnabled: false}}
+      />
+      <Stack.Screen
+        name="AdminDashboard"
+        component={AdminDashboard}
+        options={{gestureEnabled: false}}
+      />
+      <Stack.Screen
+        name="UserManagement"
+        component={UserManagement}
+        options={{gestureEnabled: false}}
+      />
+      <Stack.Screen
+        name="ArticleManagement"
+        component={ArticleManagement}
         options={{gestureEnabled: false}}
       />
     </Stack.Navigator>

@@ -84,14 +84,23 @@ const LoginNative: React.FC<Props> = ({ onSuccess }) => {
           await saveAuthData(data.token, data.user, data.expiresIn);
         }
 
-        // Trigger migration after successful login
-        const migrationResult = await migrateDataToBackend();
-        console.log('Migration result:', migrationResult);
+        // Check user role and redirect accordingly
+        if (data?.user?.role === 'admin') {
+          // Admin users go to admin dashboard
+          setMessage("Welcome Admin!");
+          setTimeout(() => {
+            navigation.replace('AdminDashboard' as any);
+          }, 500);
+        } else {
+          // Regular users go to the app and trigger migration
+          const migrationResult = await migrateDataToBackend();
+          console.log('Migration result:', migrationResult);
 
-        setMessage("Login successful!");
-        setTimeout(() => {
-          navigation.replace('BottomTabNavigation', {screen: 'HomeScreen'});
-        }, 500);
+          setMessage("Login successful!");
+          setTimeout(() => {
+            navigation.replace('BottomTabNavigation', {screen: 'HomeScreen'});
+          }, 500);
+        }
       } else {
         setMessage("Registration successful! Please log in.");
         setMode("login");

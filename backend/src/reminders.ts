@@ -201,6 +201,11 @@ router.post("/bulk", async (req: AuthRequest, res) => {
 
         const notificationChannelId = `${task}_${plantName}_${req.userId}`;
 
+        // Convert createDate to MySQL datetime format
+        const mysqlCreateDate = createDate
+          ? toMySQLDateTime(createDate)
+          : toMySQLDateTime(new Date().toISOString());
+
         await connection.execute(
           `INSERT INTO reminders
            (user_id, plant_id, plant_name, plant_image, task, repeat_frequency, time_repeat, create_date, notification_channel_id, device_tokens)
@@ -213,7 +218,7 @@ router.post("/bulk", async (req: AuthRequest, res) => {
             task,
             repeat,
             timeRepeate,
-            createDate || new Date().toISOString(),
+            mysqlCreateDate,
             notificationChannelId,
             JSON.stringify([]),
           ]

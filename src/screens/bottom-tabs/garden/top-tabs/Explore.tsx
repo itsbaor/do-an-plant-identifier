@@ -18,6 +18,7 @@ import {SCREEN_WIDTH} from '@gorhom/bottom-sheet';
 import {Notifier, NotifierComponents} from 'react-native-notifier';
 import i18n from '~/i18n';
 import LottieView from 'lottie-react-native';
+import {fetchArticlesFromBackend} from '~/services/articleService';
 
 export type t_ExplorePost = {
   id: string;
@@ -26,14 +27,11 @@ export type t_ExplorePost = {
   image: string;
 };
 
-const URL_EXPLORE =
-  'https://perenual.com/api/article-faq-list?key=sk-w4vD6719beeea5a167404&page=';
-
-export const fetchExploreData = async (pageNum: number) => {
-  const url = URL_EXPLORE + pageNum;
+export const fetchExploreData = async (limit: number = 20, offset: number = 0) => {
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
+    const result = await fetchArticlesFromBackend(undefined, limit, offset);
+
+    if (!result.success || !result.data) {
       Notifier.showNotification({
         title: 'Oopss!',
         description: i18n.t(
@@ -44,19 +42,19 @@ export const fetchExploreData = async (pageNum: number) => {
           alertType: 'error',
         },
       });
+      return [];
     }
-    const {data} = await response.json(); // Convert the response to a JavaScript object
-    const exploreItemModified: t_ExplorePost[] = data
-      .filter((item: any) => item.default_image != null)
-      .map((item: any, index: number) => ({
-        id: item.id,
-        content: item.answer,
-        title: item.question,
-        image:
-          item.default_image == null
-            ? 'img_default_image'
-            : item.default_image.original_url,
+
+    // Map backend articles to the existing t_ExplorePost structure
+    const exploreItemModified: t_ExplorePost[] = result.data
+      .filter((article) => article.image_url != null)
+      .map((article) => ({
+        id: String(article.id),
+        content: article.content,
+        title: article.title,
+        image: article.image_url || 'img_default_image',
       }));
+
     return exploreItemModified;
   } catch (error) {
     console.error('There has been a problem with your fetch operation:', error);
@@ -69,11 +67,6 @@ const Explore = () => {
   const theme = useAppTheme();
   const navigation =
     useNavigation<StackNavigationProp<RootParamList, 'BottomTabNavigation'>>();
-  const pageRandom = useMemo(() => {
-    const min = 1;
-    const max = 10;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }, []);
   const [listPost, setListPost] = useState<t_ExplorePost[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,7 +82,7 @@ const Explore = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const exploreDataPage = await fetchExploreData(pageRandom);
+      const exploreDataPage = await fetchExploreData(20, 0);
       setListPost(exploreDataPage);
       setLoading(false);
     };

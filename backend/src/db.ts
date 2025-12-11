@@ -45,10 +45,42 @@ export async function getPool() {
         name VARCHAR(200) NOT NULL,
         email VARCHAR(320) NOT NULL UNIQUE,
         password_hash VARCHAR(200) NOT NULL,
+        role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+        is_active BOOLEAN DEFAULT TRUE,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email);`).catch(() => {});
+
+    // Add role column to existing users table (migration)
+    await pool.query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
+      ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+    `).catch(() => {
+      // Ignore error if columns already exist
+      console.log('Role columns may already exist, skipping...');
+    });
+
+    // Create articles table for Explore content
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS articles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        content TEXT NOT NULL,
+        image_url TEXT,
+        category VARCHAR(100),
+        author_id INT NOT NULL,
+        is_published BOOLEAN DEFAULT FALSE,
+        views INT DEFAULT 0,
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_published (is_published, created_at),
+        INDEX idx_category (category, is_published)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
 
     // Create plants table
     await pool.query(`
@@ -98,8 +130,42 @@ export async function getPool() {
         INDEX idx_reminder_schedule (user_id, repeat_frequency, time_repeat)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    // Create default admin account if not exists
+    await createDefaultAdmin(pool);
   }
   return pool;
+}
+
+// Create default admin account
+async function createDefaultAdmin(pool: mysql.Pool) {
+  try {
+    const bcrypt = await import('bcrypt');
+
+    // Check if admin exists
+    const [existing] = await pool.execute(
+      'SELECT id FROM users WHERE email = ? LIMIT 1',
+      ['admin@plantidentifier.com']
+    );
+
+    if ((existing as any[]).length === 0) {
+      // Create admin account
+      const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
+
+      await pool.execute(
+        'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
+        ['Administrator', 'admin@plantidentifier.com', passwordHash, 'admin']
+      );
+
+      console.log('✅ Default admin account created:');
+      console.log('   Email: admin@plantidentifier.com');
+      console.log('   Password:', adminPassword);
+      console.log('   ⚠️  Please change the password after first login!');
+    }
+  } catch (error) {
+    console.error('Error creating default admin:', error);
+  }
 }
 
 export default { getPool };

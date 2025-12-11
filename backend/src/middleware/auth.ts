@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { Secret } from "jsonwebtoken";
+import db from "../db";
+import type { RowDataPacket } from "mysql2";
 
 export interface AuthRequest extends Request {
   userId?: number;
   userEmail?: string;
+  userRole?: string;
 }
 
 export function authMiddleware(
@@ -56,5 +59,43 @@ export function authMiddleware(
     }
     console.error("Auth middleware error:", error);
     return res.status(500).json({ error: "Authentication failed" });
+  }
+}
+
+/**
+ * Admin middleware - checks if user has admin role
+ * Must be used AFTER authMiddleware
+ */
+export async function adminMiddleware(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const pool = await db.getPool();
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      "SELECT role FROM users WHERE id = ? LIMIT 1",
+      [req.userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userRole = rows[0].role;
+    req.userRole = userRole;
+
+    if (userRole !== 'admin') {
+      return res.status(403).json({ error: "Access denied. Admin role required." });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Admin middleware error:", error);
+    return res.status(500).json({ error: "Authorization check failed" });
   }
 }

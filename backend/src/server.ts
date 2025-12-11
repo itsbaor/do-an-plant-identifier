@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import authRouter from "./auth";
 import plantsRouter from "./plants";
 import remindersRouter from "./reminders";
+import usersRouter from "./users";
+import articlesRouter from "./articles";
 import db from "./db";
 
 dotenv.config();
@@ -17,6 +19,8 @@ app.get("/", (_req, res) => res.json({ ok: true, service: "Plant Auth API (MySQL
 app.use("/api/auth", authRouter);
 app.use("/api/plants", plantsRouter);
 app.use("/api/reminders", remindersRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/articles", articlesRouter);
 
 const port = Number(process.env.PORT || 3000);
 

@@ -14,6 +14,8 @@ type UserRow = RowDataPacket & {
   name: string;
   email: string;
   password_hash: string;
+  role?: string;
+  is_active?: boolean;
 };
 
 /** Tạo JWT với thời hạn tuỳ theo remember */
@@ -94,12 +96,17 @@ router.post("/login", async (req, res) => {
 
     // Lấy user theo email
     const [rows] = await pool.execute<UserRow[]>(
-      "SELECT id, name, email, password_hash FROM users WHERE email = ? LIMIT 1",
+      "SELECT id, name, email, password_hash, role, is_active FROM users WHERE email = ? LIMIT 1",
       [email.trim().toLowerCase()]
     );
     const user = rows[0];
     if (!user) {
       return res.status(401).json({ error: "Email hoặc mật khẩu không đúng" });
+    }
+
+    // Check if user is active
+    if (user.is_active === false) {
+      return res.status(403).json({ error: "Tài khoản đã bị vô hiệu hóa" });
     }
 
     // So khớp mật khẩu
@@ -113,7 +120,7 @@ router.post("/login", async (req, res) => {
 
     return res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (e) {
     console.error(e);
